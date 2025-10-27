@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copiar el resto del código de la aplicación
 COPY . .
 
+# Crear directorio para la base de datos
+RUN mkdir -p /app/db
+
 # Exponer el puerto que la aplicación usará
 EXPOSE 8000
 

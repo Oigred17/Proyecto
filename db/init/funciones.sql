@@ -1,14 +1,14 @@
-CREATE OR REPLACE FUNCTION actualizar_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Triggers para actualización automática de timestamps
+-- Compatible con MySQL, PostgreSQL y SQLite
 
+-- Trigger para actualizar updated_at en materias
+CREATE TRIGGER trigger_materias_updated_at 
+    BEFORE UPDATE ON materias
+    FOR EACH ROW
+    SET NEW.updated_at = CURRENT_TIMESTAMP;
 
-CREATE TRIGGER trigger_materias_updated_at BEFORE UPDATE ON materias
-    FOR EACH ROW EXECUTE FUNCTION actualizar_updated_at();
-
-CREATE TRIGGER trigger_examenes_updated_at BEFORE UPDATE ON examenes
-    FOR EACH ROW EXECUTE FUNCTION actualizar_updated_at();
+-- Trigger para actualizar updated_at en examenes
+CREATE TRIGGER trigger_examenes_updated_at 
+    BEFORE UPDATE ON examenes
+    FOR EACH ROW
+    SET NEW.updated_at = CURRENT_TIMESTAMP;
