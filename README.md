@@ -3,7 +3,8 @@
 ## Integrantes 
 - Daniel Bernardino Reyes Nolasco
 - Dergio Eliezer Figueroa Cortés
-- Giovany Herrera Lopéz 
+- Giovany Herrera Lopéz
+
 Este proyecto contiene una aplicación web completa con un backend en Python (FastAPI), un frontend en React, y una base de datos PostgreSQL. Todo el entorno está containerizado con Docker para un despliegue fácil y consistente.
 
 ## Estructura del Proyecto
