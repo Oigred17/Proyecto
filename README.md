@@ -1,6 +1,6 @@
 # Proyecto Full Stack con Docker
 
-##Integrantes 
+## Integrantes 
 - Daniel Bernardino Reyes Nolasco
 - Dergio Eliezer Figueroa Cortés
 - Giovany Herrera Lopéz 
