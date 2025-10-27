@@ -1,0 +1,126 @@
+-- Sistema de Calendarización de Exámenes
+-- Base de datos para gestión de horarios, carreras, grupos, profesores y exámenes
+
+-- Tabla de Roles de Usuario
+CREATE TABLE roles (
+    id INTEGER PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de Usuarios
+CREATE TABLE usuarios (
+    id INTEGER PRIMARY KEY,
+    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+-- Tabla de Profesores
+CREATE TABLE profesores (
+    id INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    usuario_id INTEGER UNIQUE, -- Un profesor puede tener una cuenta de usuario (opcional y único)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+-- Tabla de relación Profesor-Sinodal
+CREATE TABLE profesor_sinodales (
+    profesor_id INTEGER NOT NULL UNIQUE, -- El profesor que tiene un sinodal
+    sinodal_id INTEGER NOT NULL, -- El profesor que es el sinodal
+    PRIMARY KEY (profesor_id),
+    FOREIGN KEY (profesor_id) REFERENCES profesores(id),
+    FOREIGN KEY (sinodal_id) REFERENCES profesores(id)
+);
+
+-- Tabla de Aulas
+CREATE TABLE aulas (
+    id INTEGER PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    capacidad INTEGER DEFAULT 0,
+    tipo TEXT CHECK(tipo IN ('Normal', 'Laboratorio', 'Sala')) DEFAULT 'Normal',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de Materias
+CREATE TABLE materias (
+    id INTEGER PRIMARY KEY,
+    clave VARCHAR(20) UNIQUE NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    semestre INTEGER,
+    horas_semanales INTEGER DEFAULT 0,
+    es_ingles INTEGER DEFAULT 0, -- 0=false, 1=true
+    carrera_id INTEGER NOT NULL, -- Una materia debe pertenecer a una carrera
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de Tipos de Examen
+CREATE TABLE tipos_examen (
+    id INTEGER PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE, -- "Parcial", "Ordinario", "Extraordinario", "Especial"
+    descripcion TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de Exámenes Programados
+CREATE TABLE examenes (
+    id INTEGER PRIMARY KEY,
+    grupo_id INTEGER NOT NULL,
+    materia_id INTEGER NOT NULL,
+    profesor_id INTEGER NOT NULL,
+    tipo_examen_id INTEGER NOT NULL,
+    aula_id INTEGER, -- Dónde se realiza el examen
+    fecha DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    numero_alumnos INTEGER DEFAULT 0,
+    observaciones TEXT,
+    estado TEXT CHECK(estado IN ('Programado', 'Realizado', 'Cancelado')) DEFAULT 'Programado',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (materia_id) REFERENCES materias(id),
+    FOREIGN KEY (profesor_id) REFERENCES profesores(id),
+    FOREIGN KEY (tipo_examen_id) REFERENCES tipos_examen(id),
+    FOREIGN KEY (aula_id) REFERENCES aulas(id)
+);
+
+-- Tabla de Conflictos/Restricciones
+CREATE TABLE restricciones (
+    id INTEGER PRIMARY KEY,
+    profesor_id INTEGER,
+    aula_id INTEGER,
+    grupo_id INTEGER, -- La tabla 'grupos' no existe aún.
+    fecha DATE,
+    hora_inicio TIME,
+    hora_fin TIME,
+    motivo TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profesor_id) REFERENCES profesores(id) ON DELETE CASCADE,
+    FOREIGN KEY (aula_id) REFERENCES aulas(id) ON DELETE CASCADE,
+    -- FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE CASCADE, -- Descomentar cuando se cree la tabla 'grupos'
+    CHECK (
+        (CASE WHEN profesor_id IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN aula_id IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN grupo_id IS NOT NULL THEN 1 ELSE 0 END) = 1
+    )
+);
+
+-- Tabla de Logs/Auditoría
+CREATE TABLE auditoria (
+    id INTEGER PRIMARY KEY,
+    accion VARCHAR(100) NOT NULL,
+    tabla_afectada VARCHAR(50),
+    registro_id INTEGER,
+    usuario_id INTEGER,
+    datos_anteriores TEXT, -- Storing JSON as TEXT
+    datos_nuevos TEXT, -- Storing JSON as TEXT
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
