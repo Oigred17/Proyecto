@@ -1,0 +1,21 @@
+{
+  "name": "proyecto",
+  "version": "1.0.0",
+  "description": "- Daniel Bernardino Reyes Nolasco\r - Dergio Eliezer Figueroa Cortés\r - Giovany Herrera Lopéz",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oigred17/Proyecto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Oigred17/Proyecto/issues"
+  },
+  "homepage": "https://github.com/Oigred17/Proyecto#readme"
+}

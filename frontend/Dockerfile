@@ -1,22 +1,14 @@
-# Usar una imagen base de Node.js
-FROM node:16-alpine
+# Usar nginx para servir archivos estáticos
+FROM nginx:alpine
 
-# Establecer el directorio de trabajo
-WORKDIR /app
+# Copiar archivos estáticos del frontend
+COPY . /usr/share/nginx/html
 
-# Copiar los archivos de definición de paquetes e instalar dependencias
-# Esto aprovecha el cache de capas de Docker
-COPY package*.json ./
-RUN npm install
-
-# Copiar el resto de los archivos de la aplicación
-COPY . .
-
-# El puerto por defecto de create-react-app
+# Exponer el puerto 3000
 EXPOSE 3000
 
+# Configurar nginx para escuchar en el puerto 3000
+RUN echo 'server { listen 3000; location / { root /usr/share/nginx/html; index index.html; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
 
-
-
-# Comando para iniciar la aplicación en modo de desarrollo
-CMD ["npm", "start"]
+# Comando para iniciar nginx
+CMD ["nginx", "-g", "daemon off;"]

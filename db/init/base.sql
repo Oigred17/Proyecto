@@ -3,7 +3,7 @@
 
 -- Tabla de Carreras
 CREATE TABLE carreras (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(100) NOT NULL UNIQUE,
     codigo VARCHAR(20) UNIQUE,
     descripcion TEXT,
@@ -12,7 +12,7 @@ CREATE TABLE carreras (
 
 -- Tabla de Roles de Usuario
 CREATE TABLE roles (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(50) NOT NULL UNIQUE,
     descripcion TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -20,7 +20,7 @@ CREATE TABLE roles (
 
 -- Tabla de Usuarios
 CREATE TABLE usuarios (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     rol_id INTEGER NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE usuarios (
 
 -- Tabla de Profesores
 CREATE TABLE profesores (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
@@ -41,7 +41,7 @@ CREATE TABLE profesores (
 
 -- Tabla de relación Profesor-Sinodal por Materia
 CREATE TABLE profesor_sinodales (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     profesor_id INTEGER NOT NULL, -- El profesor que tiene un sinodal
     sinodal_id INTEGER NOT NULL, -- El profesor que es el sinodal
     materia_id INTEGER NOT NULL, -- La materia específica para la cual es sinodal
@@ -54,7 +54,7 @@ CREATE TABLE profesor_sinodales (
 
 -- Tabla de Academias
 CREATE TABLE academias (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(100) NOT NULL UNIQUE,
     codigo VARCHAR(20) UNIQUE,
     descripcion TEXT,
@@ -63,7 +63,7 @@ CREATE TABLE academias (
 
 -- Tabla de Aulas
 CREATE TABLE aulas (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(50) NOT NULL UNIQUE,
     capacidad INTEGER DEFAULT 0,
     tipo VARCHAR(20) CHECK(tipo IN ('Normal', 'Laboratorio', 'Sala')) DEFAULT 'Normal',
@@ -72,7 +72,7 @@ CREATE TABLE aulas (
 
 -- Tabla de Materias
 CREATE TABLE materias (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     clave VARCHAR(20) UNIQUE NOT NULL,
     nombre VARCHAR(150) NOT NULL,
     semestre INTEGER,
@@ -86,7 +86,7 @@ CREATE TABLE materias (
 
 -- Tabla de Tipos de Examen
 CREATE TABLE tipos_examen (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(50) NOT NULL UNIQUE, -- "Parcial", "Ordinario", "Extraordinario", "Especial"
     descripcion TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -94,7 +94,7 @@ CREATE TABLE tipos_examen (
 
 -- Tabla de Grupos
 CREATE TABLE grupos (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre VARCHAR(50) NOT NULL,
     semestre INTEGER NOT NULL,
     carrera_id INTEGER NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE grupos (
 
 -- Tabla de Exámenes Programados
 CREATE TABLE examenes (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     grupo_id INTEGER NOT NULL,
     materia_id INTEGER NOT NULL,
     profesor_id INTEGER NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE examenes (
 
 -- Tabla de Conflictos/Restricciones
 CREATE TABLE restricciones (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     profesor_id INTEGER,
     aula_id INTEGER,
     grupo_id INTEGER,
@@ -156,7 +156,7 @@ CREATE TABLE restricciones (
 
 -- Tabla de Logs/Auditoría
 CREATE TABLE auditoria (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     accion VARCHAR(100) NOT NULL,
     tabla_afectada VARCHAR(50),
     registro_id INTEGER,

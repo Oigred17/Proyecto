@@ -28,7 +28,12 @@ def init_database():
         if os.path.exists(sql_file):
             with open(sql_file, 'r', encoding='utf-8') as f:
                 sql_content = f.read()
-                cursor.executescript(sql_content)
+                try:
+                    cursor.executescript(sql_content)
+                except sqlite3.OperationalError as e:
+                    # Ignorar errores de tablas que ya existen
+                    if "already exists" not in str(e):
+                        print(f"Error ejecutando {sql_file}: {e}")
     
     conn.commit()
     conn.close()

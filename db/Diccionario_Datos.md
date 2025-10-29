@@ -346,3 +346,4 @@ ROLES (1) ---------> (N) USUARIOS (1) -----> (N) PROFESORES
 ---
 
 *Documento generado automáticamente - Sistema de Calendarización de Exámenes*
+
