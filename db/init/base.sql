@@ -39,13 +39,26 @@ CREATE TABLE profesores (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- Tabla de relación Profesor-Sinodal
+-- Tabla de relación Profesor-Sinodal por Materia
 CREATE TABLE profesor_sinodales (
-    profesor_id INTEGER NOT NULL UNIQUE, -- El profesor que tiene un sinodal
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    profesor_id INTEGER NOT NULL, -- El profesor que tiene un sinodal
     sinodal_id INTEGER NOT NULL, -- El profesor que es el sinodal
-    PRIMARY KEY (profesor_id),
+    materia_id INTEGER NOT NULL, -- La materia específica para la cual es sinodal
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (profesor_id) REFERENCES profesores(id),
-    FOREIGN KEY (sinodal_id) REFERENCES profesores(id)
+    FOREIGN KEY (sinodal_id) REFERENCES profesores(id),
+    FOREIGN KEY (materia_id) REFERENCES materias(id),
+    UNIQUE KEY unique_profesor_sinodal_materia (profesor_id, sinodal_id, materia_id)
+);
+
+-- Tabla de Academias
+CREATE TABLE academias (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    codigo VARCHAR(20) UNIQUE,
+    descripcion TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabla de Aulas
@@ -87,10 +100,14 @@ CREATE TABLE grupos (
     carrera_id INTEGER NOT NULL,
     profesor_id INTEGER NOT NULL,
     materia_id INTEGER NOT NULL,
+    academia_id INTEGER NOT NULL,
+    aula_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (carrera_id) REFERENCES carreras(id),
     FOREIGN KEY (profesor_id) REFERENCES profesores(id),
-    FOREIGN KEY (materia_id) REFERENCES materias(id)
+    FOREIGN KEY (materia_id) REFERENCES materias(id),
+    FOREIGN KEY (academia_id) REFERENCES academias(id),
+    FOREIGN KEY (aula_id) REFERENCES aulas(id)
 );
 
 -- Tabla de Exámenes Programados
@@ -144,8 +161,16 @@ CREATE TABLE auditoria (
     tabla_afectada VARCHAR(50),
     registro_id INTEGER,
     usuario_id INTEGER,
+    examen_id INTEGER,
+    grupo_id INTEGER,
+    aula_id INTEGER,
+    tipo_examen_id INTEGER,
     datos_anteriores TEXT, -- Storing JSON as TEXT
     datos_nuevos TEXT, -- Storing JSON as TEXT
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (examen_id) REFERENCES examenes(id),
+    FOREIGN KEY (grupo_id) REFERENCES grupos(id),
+    FOREIGN KEY (aula_id) REFERENCES aulas(id),
+    FOREIGN KEY (tipo_examen_id) REFERENCES tipos_examen(id)
 );
