@@ -1,0 +1,59 @@
+.cs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.cs-modal {
+  width: 720px;
+  max-width: 95%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 16px;
+}
+
+.cs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cs-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.cs-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cs-form label {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.cs-form select,
+.cs-form input,
+.cs-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.cs-form textarea { min-height: 80px; }
+
+.cs-actions { grid-column: 1 / -1; display:flex; gap:8px; justify-content:flex-end; margin-top:8px }
+.cs-submit { background:#48bb78; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer }
+.cs-cancel { background:#edf2f7; border:none; padding:8px 14px; border-radius:6px; cursor:pointer }

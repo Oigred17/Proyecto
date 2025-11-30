@@ -1,0 +1,128 @@
+.exam-schedule-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+}
+
+.exam-schedule-container h2 {
+    color: #343a40;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.8em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+}
+
+.exam-schedule-container p {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 30px;
+}
+
+.exam-date-group {
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.exam-date-group h3 {
+    background-color: #6c757d;
+    color: #ffffff;
+    padding: 12px 20px;
+    margin: 0;
+    font-size: 1.3em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.exam-list {
+    padding: 15px 20px;
+}
+
+.exam-item {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 0;
+    border-bottom: 1px dashed #e9ecef;
+}
+
+.exam-item:last-child {
+    border-bottom: none;
+}
+
+.exam-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.exam-materia {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #495057;
+}
+
+.exam-time {
+    font-size: 1em;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.exam-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.exam-aula, .exam-profesor, .exam-carrera {
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.exam-aula {
+    color: #28a745; /* Green for Aula */
+}
+
+.exam-profesor {
+    color: #ffc107; /* Orange for Profesor */
+}
+
+.exam-carrera {
+    color: #17a2b8; /* Info blue for Carrera */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .exam-date-group h3 {
+        font-size: 1.1em;
+        padding: 10px 15px;
+    }
+
+    .exam-item {
+        padding: 10px 0;
+    }
+
+    .exam-header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 5px;
+    }
+
+    .exam-time {
+        margin-top: 5px;
+    }
+
+    .exam-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

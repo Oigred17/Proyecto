@@ -8,7 +8,9 @@ services:
     volumes:
       - ./db:/app/db
     environment:
-      - DATABASE_PATH=/app/db/project.db
+      - DATABASE_URL=postgresql+psycopg2://proj_user:proj_pass@db:5432/proyecto_db
+    depends_on:
+      - db
 
   frontend:
     build:
@@ -17,9 +19,24 @@ services:
     container_name: frontend_app
     restart: always
     ports:
-      - "80:3000"
-    environment:
-      - HOST=0.0.0.0
+      - "8080:80"
     depends_on:
       - backend
+
+  db:
+    image: postgres:15-alpine
+    container_name: proyecto_db
+    restart: always
+    environment:
+      - POSTGRES_USER=proj_user
+      - POSTGRES_PASSWORD=proj_pass
+      - POSTGRES_DB=proyecto_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+
+volumes:
+  pgdata:
 

@@ -1,0 +1,66 @@
+.input-field-wrapper {
+  width: 100%;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #4a5568;
+  border-radius: 12px;
+  padding: 0 15px;
+  height: 55px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.input-group:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(74, 85, 104, 0.3);
+  background-color: #5a6578;
+}
+
+.input-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: white;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-group:focus-within .input-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.input-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.2s ease;
+}
+
+.input-field:focus::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
