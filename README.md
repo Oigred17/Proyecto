@@ -58,17 +58,28 @@ Este proyecto contiene una aplicación web completa con un backend en Python (Fa
     docker-compose logs -f
     ```
 
-## Acceder a los Servicios en la Red Local
+## Usuarios de Prueba
 
-Una vez que los contenedores estén en funcionamiento, puedes acceder a los servicios desde cualquier dispositivo en la misma red (por ejemplo, el del profesor):
+Para acceder al sistema, utiliza los siguientes usuarios con sus contraseñas:
+
+| Usuario | Contraseña | Rol | Acceso |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | Administrador | Acceso total, incluyendo gestión de usuarios. |
+| `escolares` | `escolares123` | Servicios Escolares | Acceso a todo el contenido, excepto gestión de usuarios. |
+| `jefe_informatica` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Informática". |
+| `jefe_enfermeria` | `enfermeria123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Enfermería". |
+
+## Acceder a los Servicios
+
+Una vez que los contenedores estén en funcionamiento, puedes acceder a los servicios desde cualquier dispositivo en la misma red usando la **IP de tu máquina**:
 
 -   **Aplicación Frontend (React):**
-    -   **URL:** `http://132.18.53.85`
-    -   Esta es la página web principal.
+    -   **URL:** `http://<IP_DE_TU_MAQUINA>` (puerto 80)
+    -   Ejemplo: `http://192.168.1.100`
 
 -   **API Backend (FastAPI):**
-    -   **URL:** `http://132.18.53.85:8000`
-    -   Documentación interactiva de la API disponible en `http://132.18.53.85:8000/docs`.
+    -   **URL:** `http://<IP_DE_TU_MAQUINA>:8000`
+    -   Documentación interactiva: `http://<IP_DE_TU_MAQUINA>:8000/docs`
 
 -   **Gestor de Base de Datos (Adminer):**
     -   **URL:** `http://132.18.53.85:8080`

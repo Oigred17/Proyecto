@@ -20,20 +20,16 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://132.18.53.85",
-    "http://132.18.53.85:8080",
-    "*"  # Permitir todo para evitar problemas de desarrollo
+    "*"  # Allow all origins for development
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 def get_db():
@@ -370,3 +366,24 @@ def create_examen(examen: schemas.ExamenCreate, db: Session = Depends(get_db)):
         joinedload(models.Examen.grupo)
     ).filter(models.Examen.id == db_examen.id).first()
 
+# ==================== ENDPOINTS DE GESTIÓN DE USUARIOS ====================
+
+@app.get("/api/users", response_model=List[schemas.User])
+def get_users(db: Session = Depends(get_db)):
+    """Obtener lista de todos los usuarios"""
+    users = db.query(models.User).all()
+    # Convertir is_active a booleano para cada usuario
+    for user in users:
+        user.is_active = bool(user.is_active)
+    return users
+
+@app.delete("/api/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    """Eliminar un usuario por ID"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    db.delete(user)
+    db.commit()
+    return {"message": "Usuario eliminado exitosamente"}

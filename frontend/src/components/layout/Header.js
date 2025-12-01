@@ -14,12 +14,7 @@ function Header({ onMenuToggle, currentUser, onLogout }) {
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <div className="logo">
-          <div className="logo-square logo-pink"></div>
-          <div className="logo-square logo-blue"></div>
-          <div className="logo-square logo-green"></div>
-          <div className="logo-square logo-yellow"></div>
-        </div>
+        <h1 className="header-title">Calendarios de Exámenes</h1>
       </div>
       <div className="header-right">
         <div className="notification-wrapper">
@@ -52,3 +47,8 @@ function Header({ onMenuToggle, currentUser, onLogout }) {
 }
 
 export default Header;
+
+/* Add this to Header.css or inline style if preferred, but since we are editing JS, I will assume CSS is handled separately or I should edit CSS file. 
+   Wait, I am editing JS file here. I should edit Header.css separately. 
+   I will just do the JS change here. 
+*/

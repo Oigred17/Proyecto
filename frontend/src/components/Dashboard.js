@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
 import ExamScheduleDisplay from './ExamScheduleDisplay'; // Import the new component
+import UserManagement from './UserManagement'; // Import UserManagement component
 import './Dashboard.css';
 
 // Helper function to get day of the week from YYYY-MM-DD string
@@ -23,6 +24,11 @@ function Dashboard({ currentUser, onLogout }) {
   const [selectedGrupoIdForExamenes, setSelectedGrupoIdForExamenes] = useState(null);
   const [showNotification, setShowNotification] = useState(false); // State for notification visibility
   const [notificationMessage, setNotificationMessage] = useState(''); // State for notification message
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   // Construir la URL base dinámicamente usando el hostname actual
   const API_URL = `http://${window.location.hostname}:8000/api`;
@@ -38,8 +44,25 @@ function Dashboard({ currentUser, onLogout }) {
       })
       .then(data => {
         console.log('Carreras fetched:', data);
-        setCarreras(data);
-        const allHorarios = data.flatMap(carrera =>
+
+        let filteredCarreras = data;
+
+        // Filtrar por rol de Jefe de Carrera
+        if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+          filteredCarreras = data.filter(c => c.nombre === currentUser.carrera);
+          // Auto-seleccionar la carrera
+          if (filteredCarreras.length > 0) {
+            const carrera = filteredCarreras[0];
+            // Solo establecer si no hay una seleccionada (para evitar loops si se agrega currentUser a deps)
+            if (!selectedCarreraId) {
+              setSelectedCarreraName(carrera.nombre);
+              setSelectedCarreraId(carrera.id);
+            }
+          }
+        }
+
+        setCarreras(filteredCarreras);
+        const allHorarios = filteredCarreras.flatMap(carrera =>
           carrera.grupos.flatMap(grupo =>
             grupo.horarios.map(horario => ({
               ...horario,
@@ -55,7 +78,7 @@ function Dashboard({ currentUser, onLogout }) {
       .catch(error => console.error('Error fetching carreras:', error));
 
     fetchExamenes();
-  }, []);
+  }, [currentUser]);
 
   const fetchExamenes = () => {
     console.log('Fetching examenes...');
@@ -176,10 +199,10 @@ function Dashboard({ currentUser, onLogout }) {
 
   return (
     <div className="dashboard">
-      <Header currentUser={currentUser} onLogout={onLogout} onMenuToggle={() => { }} />
+      <Header currentUser={currentUser} onLogout={onLogout} onMenuToggle={toggleSidebar} />
 
       <div className="dashboard-content">
-        <Sidebar activeView={activeView} onSelectView={handleSelectView} />
+        <Sidebar activeView={activeView} onSelectView={handleSelectView} isCollapsed={isSidebarCollapsed} currentUser={currentUser} />
 
         <main className="main-content">
           <div className="content-header">
@@ -306,7 +329,10 @@ function Dashboard({ currentUser, onLogout }) {
                 <ExamScheduleDisplay examenes={filteredExamenes} />
               </>
             )}
-            {activeView !== 'Calendario' && activeView !== 'Horarios' && (
+            {activeView === 'Usuarios' && (
+              <UserManagement />
+            )}
+            {activeView !== 'Calendario' && activeView !== 'Horarios' && activeView !== 'Usuarios' && (
               <div style={{ padding: '20px', textAlign: 'center', color: '#718096' }}>
                 Selecciona una opción de la barra lateral para ver el contenido.
               </div>
