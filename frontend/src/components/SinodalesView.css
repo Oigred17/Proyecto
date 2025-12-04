@@ -1,0 +1,66 @@
+.sinodales-view {
+    padding: 20px;
+    background-color: #f7fafc;
+    height: 100%;
+}
+
+.sinodales-view h2 {
+    margin-bottom: 20px;
+    color: #2d3748;
+}
+
+.table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+}
+
+.sinodales-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sinodales-table th,
+.sinodales-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sinodales-table th {
+    background-color: #edf2f7;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.sinodales-table tr:hover {
+    background-color: #f7fafc;
+}
+
+.sinodales-table select {
+    padding: 8px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 200px;
+}
+
+.status-ok {
+    color: #48bb78;
+    font-weight: 500;
+}
+
+.status-pending {
+    color: #ed8936;
+    font-weight: 500;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 1.2rem;
+    color: #718096;
+}

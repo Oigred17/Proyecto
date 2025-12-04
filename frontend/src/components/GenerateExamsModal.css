@@ -1,0 +1,188 @@
+.gem-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.gem-modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gem-header {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gem-header h3 {
+  margin: 0;
+  color: #2d3748;
+}
+
+.gem-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #718096;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gem-close:hover {
+  color: #2d3748;
+}
+
+.gem-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.gem-warning {
+  background: #fff5e6;
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.gem-warning strong {
+  color: #d69e2e;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.gem-warning ul {
+  margin: 10px 0 0 20px;
+  padding: 0;
+}
+
+.gem-warning li {
+  color: #744210;
+  margin: 5px 0;
+}
+
+.gem-materias-list h4 {
+  margin: 0 0 15px 0;
+  color: #2d3748;
+}
+
+.gem-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.gem-table th,
+.gem-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.gem-table th {
+  background: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.gem-table tr:hover {
+  background: #f7fafc;
+}
+
+.gem-table tr.gem-no-sinodal {
+  background: #fff5e6;
+}
+
+.gem-table tr.gem-no-sinodal:hover {
+  background: #ffeaa7;
+}
+
+.gem-status-ok {
+  color: #38a169;
+  font-weight: 500;
+}
+
+.gem-status-warning {
+  color: #d69e2e;
+  font-weight: 500;
+}
+
+.gem-table select {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.gem-table select:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.gem-actions {
+  padding: 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.gem-cancel,
+.gem-generate {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gem-cancel {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.gem-cancel:hover {
+  background: #cbd5e0;
+}
+
+.gem-generate {
+  background: #4299e1;
+  color: white;
+}
+
+.gem-generate:hover {
+  background: #3182ce;
+}
+
+.gem-loading {
+  padding: 40px;
+  text-align: center;
+  color: #718096;
+}
+

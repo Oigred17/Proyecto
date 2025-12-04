@@ -36,13 +36,15 @@ def create_test_users():
                 "username": "jefe_informatica",
                 "password": "jefe123",
                 "role": "jefe_carrera",
-                "email": "jefe.informatica@escuela.edu.mx"
+                "email": "jefe.informatica@escuela.edu.mx",
+                "carrera": "Licenciatura en Informática"
             },
             {
                 "username": "jefe_enfermeria",
                 "password": "enfermeria123",
                 "role": "jefe_carrera",
-                "email": "jefe.enfermeria@escuela.edu.mx"
+                "email": "jefe.enfermeria@escuela.edu.mx",
+                "carrera": "Licenciatura en Enfermería"
             }
         ]
         
@@ -62,7 +64,8 @@ def create_test_users():
                     username=user_data["username"],
                     hashed_password=get_password_hash(user_data["password"]),
                     role=user_data["role"],
-                    email=user_data["email"],
+                    email=user_data.get("email"),
+                    carrera=user_data.get("carrera"),
                     is_active=1
                 )
                 db.add(new_user)
@@ -83,7 +86,7 @@ def create_test_users():
         
     except Exception as e:
         db.rollback()
-        print(f"❌ Error al crear usuarios: {e}")
+        print(f" Error al crear usuarios: {e}")
     finally:
         db.close()
 

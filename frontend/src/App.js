@@ -48,13 +48,32 @@ function App() {
       const tokenPayload = JSON.parse(atob(token.split('.')[1]));
       console.log('Token payload:', tokenPayload);
 
+      // Obtener información del usuario de la respuesta o del token
+      const userCarrera = data.user?.carrera || tokenPayload.carrera || null;
+      
+      // Si es jefe_carrera y no tiene carrera en el token, inferirla del username
+      let carrera = userCarrera;
+      if (!carrera && tokenPayload.role === 'jefe_carrera') {
+        const username = tokenPayload.sub.toLowerCase();
+        if (username.includes('informatica')) {
+          carrera = 'Licenciatura en Informática';
+        } else if (username.includes('enfermeria')) {
+          carrera = 'Licenciatura en Enfermería';
+        } else if (username.includes('contaduria')) {
+          carrera = 'Licenciatura en Contaduría';
+        }
+        // Agregar más mapeos según sea necesario
+      }
+
       setIsAuthenticated(true);
       setCurrentUser({
         username: tokenPayload.sub,
         role: tokenPayload.role,
-        email: null,
-        carrera: null
+        email: data.user?.email || null,
+        carrera: carrera
       });
+      
+      console.log('Current user set:', { username: tokenPayload.sub, role: tokenPayload.role, carrera: carrera });
 
       console.log('Login complete!');
       return true;

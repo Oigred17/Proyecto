@@ -3,6 +3,8 @@ import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
 import ExamScheduleDisplay from './ExamScheduleDisplay'; // Import the new component
 import UserManagement from './UserManagement'; // Import UserManagement component
+import SinodalesView from './SinodalesView'; // Import SinodalesView component
+import GenerateExamsModal from './GenerateExamsModal'; // Import GenerateExamsModal component
 import './Dashboard.css';
 
 // Helper function to get day of the week from YYYY-MM-DD string
@@ -25,6 +27,7 @@ function Dashboard({ currentUser, onLogout }) {
   const [showNotification, setShowNotification] = useState(false); // State for notification visibility
   const [notificationMessage, setNotificationMessage] = useState(''); // State for notification message
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false); // State for generate exams modal
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -50,18 +53,16 @@ function Dashboard({ currentUser, onLogout }) {
         // Filtrar por rol de Jefe de Carrera
         if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           filteredCarreras = data.filter(c => c.nombre === currentUser.carrera);
-          // Auto-seleccionar la carrera
+          // Auto-seleccionar la carrera siempre para jefe_carrera
           if (filteredCarreras.length > 0) {
             const carrera = filteredCarreras[0];
-            // Solo establecer si no hay una seleccionada (para evitar loops si se agrega currentUser a deps)
-            if (!selectedCarreraId) {
-              setSelectedCarreraName(carrera.nombre);
-              setSelectedCarreraId(carrera.id);
-            }
+            setSelectedCarreraName(carrera.nombre);
+            setSelectedCarreraId(carrera.id);
           }
         }
 
         setCarreras(filteredCarreras);
+        // Filtrar horarios solo de las carreras permitidas
         const allHorarios = filteredCarreras.flatMap(carrera =>
           carrera.grupos.flatMap(grupo =>
             grupo.horarios.map(horario => ({
@@ -74,6 +75,7 @@ function Dashboard({ currentUser, onLogout }) {
           )
         );
         setHorarios(allHorarios);
+        
       })
       .catch(error => console.error('Error fetching carreras:', error));
 
@@ -91,49 +93,86 @@ function Dashboard({ currentUser, onLogout }) {
       })
       .then(data => {
         console.log('Examenes fetched:', data);
-        setExamenes(data);
+        
+        // Filtrar exámenes por carrera si es jefe_carrera
+        let filteredData = data;
+        if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+          filteredData = data.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
+        }
+        
+        setExamenes(filteredData);
       })
       .catch(error => console.error('Error fetching examenes:', error));
   };
 
   const handleGenerateExams = () => {
-    if (!selectedCarreraId || !selectedGrupoId) {
-      console.warn('Selecciona una carrera y un grupo para generar exámenes.');
+    console.log('handleGenerateExams called');
+    console.log('selectedCarreraId:', selectedCarreraId);
+    console.log('currentUser:', currentUser);
+    console.log('carreras:', carreras);
+    
+    // Para jefe_carrera, usar la carrera del usuario si no hay seleccionada
+    let carreraIdToUse = selectedCarreraId;
+    
+    if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+      console.log('Buscando carrera por nombre:', currentUser.carrera);
+      const carrera = carreras.find(c => c.nombre === currentUser.carrera);
+      console.log('Carrera encontrada:', carrera);
+      carreraIdToUse = carrera?.id;
+    }
+    
+    if (!carreraIdToUse) {
+      console.warn('No se puede determinar la carrera para generar exámenes.');
+      alert('Por favor selecciona una carrera o verifica que tu usuario tenga una carrera asignada');
       return;
     }
+    
+    // Asegurar que selectedCarreraId esté establecido
+    if (!selectedCarreraId && carreraIdToUse) {
+      const carrera = carreras.find(c => c.id === carreraIdToUse);
+      if (carrera) {
+        setSelectedCarreraId(carreraIdToUse);
+        setSelectedCarreraName(carrera.nombre);
+      }
+    }
+    
+    console.log('Opening generate modal with carreraId:', carreraIdToUse);
+    // Mostrar el modal de generación
+    setShowGenerateModal(true);
+  };
 
-    console.log(`Generating exams for Carrera ID: ${selectedCarreraId}, Grupo ID: ${selectedGrupoId}...`);
-    fetch(`${API_URL}/generar-examenes?carrera_id=${selectedCarreraId}&grupo_id=${selectedGrupoId}`, { method: 'POST' })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(err => { throw new Error(err.detail || 'Error al generar exámenes'); });
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Examenes generados y recibidos:', data);
-        fetchExamenes(); // Refreshes the exam list after generation
-        setActiveView('Horarios'); // Switch to Horarios view to display generated exams
-        console.log('Active View after generation:', 'Horarios'); // Debug log for activeView
-        console.log('Notification state set: success'); // Debug log
-        setNotificationMessage('¡Exámenes generados exitosamente!');
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000); // Hide after 3 seconds
-      })
-      .catch(error => {
-        console.error('Error generating exams:', error.message);
-        console.error('Notification state set: error', error); // Debug log
-        setNotificationMessage(`Error al generar exámenes: ${error.message}`);
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 5000); // Hide error after 5 seconds
+  const handleGenerateFromModal = async (materiasData) => {
+    try {
+      // Por ahora, generar exámenes para todas las materias seleccionadas
+      // Esto puede necesitar ajustarse según la lógica del backend
+      const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${selectedCarreraId}&grupo_id=${selectedGrupoId || 0}`, { 
+        method: 'POST' 
       });
+      
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || 'Error al generar exámenes');
+      }
+      
+      const data = await response.json();
+      console.log('Examenes generados y recibidos:', data);
+      fetchExamenes();
+      setShowGenerateModal(false);
+      setActiveView('Horarios');
+      setNotificationMessage('¡Exámenes generados exitosamente!');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 3000);
+    } catch (error) {
+      console.error('Error generating exams:', error.message);
+      alert(`Error al generar exámenes: ${error.message}`);
+    }
   };
 
   const handleSelectView = (view) => {
     setActiveView(view);
   };
 
-  // Generate time slots from 7:00 AM to 8:00 PM
+  
   const timeSlots = Array.from({ length: 14 }, (_, i) => {
     const hour = i + 7;
     return `${hour.toString().padStart(2, '0')}:00`;
@@ -141,12 +180,26 @@ function Dashboard({ currentUser, onLogout }) {
 
   const weekDays = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
 
-  const filteredHorarios = horarios.filter(h =>
-    (!selectedCarreraName || h.carrera_name === selectedCarreraName) &&
-    (!selectedGrupoName || h.grupo_name === selectedGrupoName)
-  );
+  const filteredHorarios = horarios.filter(h => {
+    // Si es jefe_carrera, solo mostrar horarios de su carrera
+    if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+      if (h.carrera_name !== currentUser.carrera) {
+        return false;
+      }
+    }
+    // Filtros adicionales
+    return (!selectedCarreraName || h.carrera_name === selectedCarreraName) &&
+           (!selectedGrupoName || h.grupo_name === selectedGrupoName);
+  });
 
   const filteredExamenes = examenes.filter(e => {
+    // Si es jefe_carrera, solo mostrar exámenes de su carrera
+    if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+      if (!e.materia || e.materia.carrera_nombre !== currentUser.carrera) {
+        return false;
+      }
+    }
+    // Filtros adicionales
     const matchesCareer = !selectedCarreraName || (e.materia && e.materia.carrera_nombre === selectedCarreraName);
     const matchesGroup = !selectedGrupoIdForExamenes || (e.grupo_id && e.grupo_id === parseInt(selectedGrupoIdForExamenes));
     return matchesCareer && matchesGroup;
@@ -159,9 +212,9 @@ function Dashboard({ currentUser, onLogout }) {
     const formatTime = (t) => t.slice(0, 5);
     const formattedTime = formatTime(time);
 
-    // Find exams first
+    
     const exam = filteredExamenes.find(e => {
-      const examDay = getDayOfWeek(e.fecha); // Use the helper function
+      const examDay = getDayOfWeek(e.fecha); 
       return examDay === day && formatTime(e.hora_inicio) === formattedTime;
     });
     if (exam) {
@@ -173,7 +226,6 @@ function Dashboard({ currentUser, onLogout }) {
       );
     }
 
-    // Find regular schedules
     const horario = filteredHorarios.find(h =>
       h.dia_semana === day && formatTime(h.hora_inicio) === formattedTime
     );
@@ -191,10 +243,16 @@ function Dashboard({ currentUser, onLogout }) {
     return null;
   };
 
-  const uniqueCarreras = [...new Set(carreras.map(c => ({ id: c.id, nombre: c.nombre })))];
-  const allUniqueGroups = [...new Set(carreras.flatMap(carrera => carrera.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo, carrera_id: carrera.id }))))];
+  // Filtrar carreras según el rol
+  let carrerasToShow = carreras;
+  if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+    carrerasToShow = carreras.filter(c => c.nombre === currentUser.carrera);
+  }
+  
+  const uniqueCarreras = [...new Set(carrerasToShow.map(c => ({ id: c.id, nombre: c.nombre })))];
+  const allUniqueGroups = [...new Set(carrerasToShow.flatMap(carrera => carrera.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo, carrera_id: carrera.id }))))];
   const uniqueGrupos = selectedCarreraName
-    ? [...new Set(carreras.find(c => c.nombre === selectedCarreraName)?.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo })) || [])]
+    ? [...new Set(carrerasToShow.find(c => c.nombre === selectedCarreraName)?.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo })) || [])]
     : [];
 
   return (
@@ -215,7 +273,7 @@ function Dashboard({ currentUser, onLogout }) {
                 }
               </p>
             </div>
-            {activeView === 'Calendario' && ( // Only show controls in Calendario view
+            {activeView === 'Calendario' && ( 
               <div className="header-controls">
                 <select
                   className="career-select"
@@ -228,6 +286,7 @@ function Dashboard({ currentUser, onLogout }) {
                     setSelectedGrupoName('');
                     setSelectedGrupoId(null);
                   }}
+                  disabled={currentUser && currentUser.role === 'jefe_carrera'}
                 >
                   <option value="">Seleccionar Carrera</option>
                   {uniqueCarreras.map(career => (
@@ -254,7 +313,7 @@ function Dashboard({ currentUser, onLogout }) {
                 <button
                   className="plan-button"
                   onClick={handleGenerateExams}
-                  disabled={!selectedCarreraId || !selectedGrupoId}
+                  disabled={!selectedCarreraId && !(currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera)}
                 >
                   Planificar
                 </button>
@@ -263,7 +322,7 @@ function Dashboard({ currentUser, onLogout }) {
           </div>
 
           <div className="planning-container">
-            {activeView === 'Calendario' && ( // Render schedule grid only for Calendario view
+            {activeView === 'Calendario' && ( 
               <div className="schedule-grid">
                 <div className="grid-header">
                   <div className="time-column-header">Hora</div>
@@ -291,17 +350,17 @@ function Dashboard({ currentUser, onLogout }) {
                 ))}
               </div>
             )}
-            {activeView === 'Horarios' && ( // Render ExamScheduleDisplay for Horarios view
+            {activeView === 'Horarios' && ( 
               <>
                 <div className="examenes-filter-controls" style={{ marginBottom: '20px' }}>
-                  {/* Filter by Career (already existing logic for selectedCarreraName) */}
+                  {}
                   <select
                     className="career-select"
-                    value={selectedCarreraName} // This is for career filter for exams
+                    value={selectedCarreraName} 
                     onChange={(e) => {
                       const name = e.target.value;
                       setSelectedCarreraName(name);
-                      // Reset group filter when career changes
+                      
                       setSelectedGrupoIdForExamenes(null);
                     }}
                   >
@@ -311,16 +370,16 @@ function Dashboard({ currentUser, onLogout }) {
                     ))}
                   </select>
 
-                  {/* Filter by Group for Examenes */}
+                  {}
                   <select
                     className="group-select"
                     value={selectedGrupoIdForExamenes || ''}
                     onChange={(e) => setSelectedGrupoIdForExamenes(e.target.value ? parseInt(e.target.value) : null)}
-                    disabled={!selectedCarreraName} // Disable group filter if no career is selected
+                    disabled={!selectedCarreraName} 
                   >
                     <option value="">Todos los Grupos</option>
                     {allUniqueGroups
-                      .filter(group => !selectedCarreraName || group.carrera_id === selectedCarreraId) // Filter groups by selected career
+                      .filter(group => !selectedCarreraName || group.carrera_id === selectedCarreraId) 
                       .map(group => (
                         <option key={group.id} value={group.id}>{group.nombre_grupo}</option>
                       ))}
@@ -332,7 +391,10 @@ function Dashboard({ currentUser, onLogout }) {
             {activeView === 'Usuarios' && (
               <UserManagement />
             )}
-            {activeView !== 'Calendario' && activeView !== 'Horarios' && activeView !== 'Usuarios' && (
+            {activeView === 'Sinodal' && (
+              <SinodalesView currentUser={currentUser} />
+            )}
+            {activeView !== 'Calendario' && activeView !== 'Horarios' && activeView !== 'Usuarios' && activeView !== 'Sinodal' && (
               <div style={{ padding: '20px', textAlign: 'center', color: '#718096' }}>
                 Selecciona una opción de la barra lateral para ver el contenido.
               </div>
@@ -344,6 +406,15 @@ function Dashboard({ currentUser, onLogout }) {
         <div className="notification bottom-right">
           {notificationMessage}
         </div>
+      )}
+      {showGenerateModal && (selectedCarreraId || (currentUser && currentUser.role === 'jefe_carrera' && carreras.find(c => c.nombre === currentUser.carrera)?.id)) && (
+        <GenerateExamsModal
+          onClose={() => setShowGenerateModal(false)}
+          onGenerate={handleGenerateFromModal}
+          carreraId={selectedCarreraId || (currentUser && currentUser.role === 'jefe_carrera' && carreras.find(c => c.nombre === currentUser.carrera)?.id)}
+          currentUser={currentUser}
+          API_URL={API_URL}
+        />
       )}
     </div>
   );

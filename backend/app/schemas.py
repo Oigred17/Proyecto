@@ -5,6 +5,7 @@ from datetime import time, date
 class Profesor(BaseModel):
     id: int
     nombre: str
+    email: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -13,6 +14,16 @@ class AulaBase(BaseModel):
 
 class Aula(AulaBase):
     id: int
+    capacidad: Optional[int] = None
+    tipo: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class Academia(BaseModel):
+    id: int
+    nombre: str
+    codigo: Optional[str] = None
+    descripcion: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -78,18 +89,29 @@ class Examen(ExamenBase):
     materia_id: int
     aula_id: int
     grupo_id: int # Add grupo_id to Examen
+    sinodal_id: Optional[int] = None # Sinodal asignado
     materia: Materia
     aula: Aula
     grupo: Optional[Grupo] = None # Add grupo relationship
+    
+    # Workflow fields
+    status: Optional[str] = None
+    comentarios_rechazo: Optional[str] = None
+    fecha_envio: Optional[date] = None
+    fecha_aprobacion: Optional[date] = None
 
     class Config:
         from_attributes = True
+
+class RejectionModel(BaseModel):
+    comentarios: str
 
 # Schemas de Autenticación
 class UserBase(BaseModel):
     username: str
     role: str
     email: Optional[str] = None
+    carrera: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str

@@ -35,6 +35,13 @@ class Profesor(Base):
     materias = relationship("Materia", back_populates="profesor")
 
 
+class Academia(Base):
+    __tablename__ = 'academias'
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, unique=True, index=True)
+    codigo = Column(String, unique=True, nullable=True)
+    descripcion = Column(Text, nullable=True)
+
 class Aula(Base):
     __tablename__ = 'aulas'
     id = Column(Integer, primary_key=True, index=True)
@@ -85,7 +92,14 @@ class Examen(Base):
     tipo = Column(String) # e.g., 'PARCIAL', 'FINAL'
     materia_id = Column(Integer, ForeignKey('materias.id'))
     aula_id = Column(Integer, ForeignKey('aulas.id'))
-    grupo_id = Column(Integer, ForeignKey('grupos.id')) # Add grupo_id to Examen model
+    grupo_id = Column(Integer, ForeignKey('grupos.id'))
+    sinodal_id = Column(Integer, ForeignKey('profesores.id'), nullable=True) # Sinodal asignado
+
+   
+    status = Column(String, default='borrador') # borrador, pendiente_aprobacion, aprobado, rechazado
+    comentarios_rechazo = Column(Text, nullable=True)
+    fecha_envio = Column(Date, nullable=True)
+    fecha_aprobacion = Column(Date, nullable=True)
 
     materia = relationship("Materia", back_populates="examenes")
     aula = relationship("Aula", back_populates="examenes")
@@ -98,4 +112,5 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)  # 'servicios_escolares', 'jefe_carrera', 'secretaria'
     email = Column(String, unique=True, index=True, nullable=True)
+    carrera = Column(String, nullable=True)  # Nombre de la carrera para jefe_carrera
     is_active = Column(Integer, default=1)  # 1 for active, 0 for inactive
