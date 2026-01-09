@@ -18,24 +18,24 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
       // Fetch materias de la carrera
       const materiasRes = await fetch(`${API_URL}/materias?carrera_id=${carreraId}`);
       const materiasData = await materiasRes.ok ? await materiasRes.json() : [];
-      
+
       // Fetch exámenes existentes para verificar sinodales
       const examenesRes = await fetch(`${API_URL}/examenes`);
       const examenesData = await examenesRes.ok ? await examenesRes.json() : [];
-      
+
       // Filtrar exámenes de esta carrera
-      const examenesCarrera = examenesData.filter(e => 
+      const examenesCarrera = examenesData.filter(e =>
         e.materia && e.materia.carrera_nombre === currentUser?.carrera
       );
-      
+
       // Fetch academias
       const academiasRes = await fetch(`${API_URL}/academias`);
       const academiasData = await academiasRes.ok ? await academiasRes.json() : [];
-      
+
       setMaterias(materiasData);
       setExamenes(examenesCarrera);
       setAcademias(academiasData);
-      
+
       // Inicializar selección de materias
       const initialSelection = {};
       materiasData.forEach(m => {
@@ -86,12 +86,12 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
         materiaId: parseInt(materiaId),
         academiaId: data.academiaId ? parseInt(data.academiaId) : null
       }));
-    
+
     if (materiasToGenerate.length === 0) {
       alert('Por favor selecciona al menos una materia');
       return;
     }
-    
+
     onGenerate(materiasToGenerate);
   };
 
@@ -112,7 +112,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
           <h3>Generar Exámenes - {currentUser?.carrera}</h3>
           <button className="gem-close" onClick={onClose}>✕</button>
         </div>
-        
+
         <div className="gem-content">
           {materiasSinSinodal.length > 0 && (
             <div className="gem-warning">
@@ -124,7 +124,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
               </ul>
             </div>
           )}
-          
+
           <div className="gem-materias-list">
             <h4>Selecciona las materias para generar exámenes:</h4>
             <table className="gem-table">
@@ -141,7 +141,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                 {materias.map(materia => {
                   const examen = examenes.find(e => e.materia_id === materia.id);
                   const hasSinodalAssigned = hasSinodal(materia.id);
-                  
+
                   return (
                     <tr key={materia.id} className={!hasSinodalAssigned ? 'gem-no-sinodal' : ''}>
                       <td>
@@ -181,7 +181,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
             </table>
           </div>
         </div>
-        
+
         <div className="gem-actions">
           <button className="gem-cancel" onClick={onClose}>Cancelar</button>
           <button className="gem-generate" onClick={handleGenerate}>

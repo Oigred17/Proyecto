@@ -75,7 +75,7 @@ function Dashboard({ currentUser, onLogout }) {
           )
         );
         setHorarios(allHorarios);
-        
+
       })
       .catch(error => console.error('Error fetching carreras:', error));
 
@@ -93,13 +93,13 @@ function Dashboard({ currentUser, onLogout }) {
       })
       .then(data => {
         console.log('Examenes fetched:', data);
-        
+
         // Filtrar exámenes por carrera si es jefe_carrera
         let filteredData = data;
         if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           filteredData = data.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
         }
-        
+
         setExamenes(filteredData);
       })
       .catch(error => console.error('Error fetching examenes:', error));
@@ -110,23 +110,23 @@ function Dashboard({ currentUser, onLogout }) {
     console.log('selectedCarreraId:', selectedCarreraId);
     console.log('currentUser:', currentUser);
     console.log('carreras:', carreras);
-    
+
     // Para jefe_carrera, usar la carrera del usuario si no hay seleccionada
     let carreraIdToUse = selectedCarreraId;
-    
+
     if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
       console.log('Buscando carrera por nombre:', currentUser.carrera);
       const carrera = carreras.find(c => c.nombre === currentUser.carrera);
       console.log('Carrera encontrada:', carrera);
       carreraIdToUse = carrera?.id;
     }
-    
+
     if (!carreraIdToUse) {
       console.warn('No se puede determinar la carrera para generar exámenes.');
       alert('Por favor selecciona una carrera o verifica que tu usuario tenga una carrera asignada');
       return;
     }
-    
+
     // Asegurar que selectedCarreraId esté establecido
     if (!selectedCarreraId && carreraIdToUse) {
       const carrera = carreras.find(c => c.id === carreraIdToUse);
@@ -135,7 +135,7 @@ function Dashboard({ currentUser, onLogout }) {
         setSelectedCarreraName(carrera.nombre);
       }
     }
-    
+
     console.log('Opening generate modal with carreraId:', carreraIdToUse);
     // Mostrar el modal de generación
     setShowGenerateModal(true);
@@ -145,15 +145,15 @@ function Dashboard({ currentUser, onLogout }) {
     try {
       // Por ahora, generar exámenes para todas las materias seleccionadas
       // Esto puede necesitar ajustarse según la lógica del backend
-      const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${selectedCarreraId}&grupo_id=${selectedGrupoId || 0}`, { 
-        method: 'POST' 
+      const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${selectedCarreraId}&grupo_id=${selectedGrupoId || 0}`, {
+        method: 'POST'
       });
-      
+
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.detail || 'Error al generar exámenes');
       }
-      
+
       const data = await response.json();
       console.log('Examenes generados y recibidos:', data);
       fetchExamenes();
@@ -172,7 +172,7 @@ function Dashboard({ currentUser, onLogout }) {
     setActiveView(view);
   };
 
-  
+
   const timeSlots = Array.from({ length: 14 }, (_, i) => {
     const hour = i + 7;
     return `${hour.toString().padStart(2, '0')}:00`;
@@ -189,7 +189,7 @@ function Dashboard({ currentUser, onLogout }) {
     }
     // Filtros adicionales
     return (!selectedCarreraName || h.carrera_name === selectedCarreraName) &&
-           (!selectedGrupoName || h.grupo_name === selectedGrupoName);
+      (!selectedGrupoName || h.grupo_name === selectedGrupoName);
   });
 
   const filteredExamenes = examenes.filter(e => {
@@ -201,7 +201,10 @@ function Dashboard({ currentUser, onLogout }) {
     }
     // Filtros adicionales
     const matchesCareer = !selectedCarreraName || (e.materia && e.materia.carrera_nombre === selectedCarreraName);
-    const matchesGroup = !selectedGrupoIdForExamenes || (e.grupo_id && e.grupo_id === parseInt(selectedGrupoIdForExamenes));
+
+    // Filter by group if selected in the Calendar header controls
+    const matchesGroup = !selectedGrupoId || (e.grupo_id === selectedGrupoId);
+
     return matchesCareer && matchesGroup;
   });
 
@@ -212,34 +215,27 @@ function Dashboard({ currentUser, onLogout }) {
     const formatTime = (t) => t.slice(0, 5);
     const formattedTime = formatTime(time);
 
-    
-    const exam = filteredExamenes.find(e => {
-      const examDay = getDayOfWeek(e.fecha); 
+    // Find all exams that match this day and time
+    const exams = filteredExamenes.filter(e => {
+      const examDay = getDayOfWeek(e.fecha);
       return examDay === day && formatTime(e.hora_inicio) === formattedTime;
     });
-    if (exam) {
+
+    if (exams.length > 0) {
       return (
-        <div className="exam-assignment" style={{ backgroundColor: '#4299e1' }}>
-          <div className="exam-assignment-name">Examen: {exam.materia.nombre}</div>
-          <div className="exam-assignment-time">{exam.hora_inicio} - {exam.hora_fin}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+          {exams.map((exam, index) => (
+            <div key={exam.id || index} className="exam-assignment" style={{ backgroundColor: '#4299e1', width: '90%', margin: '0 auto' }}>
+              <div className="exam-assignment-name">{exam.materia.nombre}</div>
+              <div style={{ fontSize: '0.8em', marginBottom: '2px' }}>{exam.grupo?.nombre_grupo || 'Grupo'}</div>
+              <div className="exam-assignment-time">{exam.hora_inicio} - {exam.hora_fin}</div>
+            </div>
+          ))}
         </div>
       );
     }
 
-    const horario = filteredHorarios.find(h =>
-      h.dia_semana === day && formatTime(h.hora_inicio) === formattedTime
-    );
-
-    if (horario) {
-      return (
-        <div className="exam-assignment" style={{ backgroundColor: '#48bb78' }}>
-          <div className="exam-assignment-name">{horario.materia.nombre}</div>
-          <div className="exam-assignment-time">{horario.hora_inicio} - {horario.hora_fin}</div>
-          <div className="exam-assignment-profesor">{horario.materia.profesor?.nombre}</div>
-        </div>
-      );
-    }
-
+    // Previous class schedule logic removed as requested
     return null;
   };
 
@@ -248,7 +244,7 @@ function Dashboard({ currentUser, onLogout }) {
   if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
     carrerasToShow = carreras.filter(c => c.nombre === currentUser.carrera);
   }
-  
+
   const uniqueCarreras = [...new Set(carrerasToShow.map(c => ({ id: c.id, nombre: c.nombre })))];
   const allUniqueGroups = [...new Set(carrerasToShow.flatMap(carrera => carrera.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo, carrera_id: carrera.id }))))];
   const uniqueGrupos = selectedCarreraName
@@ -265,7 +261,7 @@ function Dashboard({ currentUser, onLogout }) {
         <main className="main-content">
           <div className="content-header">
             <div>
-              <h1>Horario de Clases y Exámenes</h1>
+              <h1>Horario de Exámenes</h1>
               <p className="subtitle">
                 {selectedCarreraName && selectedGrupoName
                   ? `${selectedCarreraName} - ${selectedGrupoName}`
@@ -273,7 +269,7 @@ function Dashboard({ currentUser, onLogout }) {
                 }
               </p>
             </div>
-            {activeView === 'Calendario' && ( 
+            {activeView === 'Calendario' && (
               <div className="header-controls">
                 <select
                   className="career-select"
@@ -322,7 +318,7 @@ function Dashboard({ currentUser, onLogout }) {
           </div>
 
           <div className="planning-container">
-            {activeView === 'Calendario' && ( 
+            {activeView === 'Calendario' && (
               <div className="schedule-grid">
                 <div className="grid-header">
                   <div className="time-column-header">Hora</div>
@@ -350,17 +346,17 @@ function Dashboard({ currentUser, onLogout }) {
                 ))}
               </div>
             )}
-            {activeView === 'Horarios' && ( 
+            {activeView === 'Horarios' && (
               <>
                 <div className="examenes-filter-controls" style={{ marginBottom: '20px' }}>
-                  {}
+                  { }
                   <select
                     className="career-select"
-                    value={selectedCarreraName} 
+                    value={selectedCarreraName}
                     onChange={(e) => {
                       const name = e.target.value;
                       setSelectedCarreraName(name);
-                      
+
                       setSelectedGrupoIdForExamenes(null);
                     }}
                   >
@@ -370,16 +366,16 @@ function Dashboard({ currentUser, onLogout }) {
                     ))}
                   </select>
 
-                  {}
+                  { }
                   <select
                     className="group-select"
                     value={selectedGrupoIdForExamenes || ''}
                     onChange={(e) => setSelectedGrupoIdForExamenes(e.target.value ? parseInt(e.target.value) : null)}
-                    disabled={!selectedCarreraName} 
+                    disabled={!selectedCarreraName}
                   >
                     <option value="">Todos los Grupos</option>
                     {allUniqueGroups
-                      .filter(group => !selectedCarreraName || group.carrera_id === selectedCarreraId) 
+                      .filter(group => !selectedCarreraName || group.carrera_id === selectedCarreraId)
                       .map(group => (
                         <option key={group.id} value={group.id}>{group.nombre_grupo}</option>
                       ))}

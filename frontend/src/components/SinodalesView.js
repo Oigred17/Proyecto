@@ -15,22 +15,22 @@ function SinodalesView({ currentUser }) {
     const fetchData = async () => {
         setLoading(true);
         try {
-           
+
             const examRes = await fetch(`${API_URL}/examenes`);
             const examData = await examRes.json();
 
-            
+
             const materiasRes = await fetch(`${API_URL}/materias`);
             const materiasData = materiasRes.ok ? await materiasRes.json() : [];
 
-           
+
             const profRes = await fetch(`${API_URL}/profesores`);
             let profData = [];
             if (profRes.ok) {
                 profData = await profRes.json();
             } else {
                 console.warn('Could not fetch /api/profesores, trying alternative method');
-                
+
                 const uniqueProfesores = {};
                 materiasData.forEach(m => {
                     if (m.profesor && m.profesor.id) {
@@ -51,7 +51,7 @@ function SinodalesView({ currentUser }) {
                 profData = Object.values(uniqueProfesores);
             }
 
-           
+
             if (profData.length > 0 && materiasData.length > 0) {
                 profData = profData.map(prof => {
                     const profMaterias = materiasData.filter(m => m.profesor && m.profesor.id === prof.id);
@@ -64,12 +64,12 @@ function SinodalesView({ currentUser }) {
                 });
             }
 
-            
+
             let filteredExams = examData;
             if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
                 filteredExams = examData.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
             }
-            
+
 
             if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
                 profData = profData.filter(p => {
@@ -127,7 +127,7 @@ function SinodalesView({ currentUser }) {
                     </thead>
                     <tbody>
                         {examenes.map(exam => {
-r
+
                             const titularId = exam.materia?.profesor?.id;
                             const examCarreraNombre = exam.materia?.carrera_nombre;
 
@@ -139,7 +139,7 @@ r
                                 if (examCarreraNombre && p.carreras) {
                                     return p.carreras.includes(examCarreraNombre);
                                 }
-                                
+
 
                                 return true;
                             });
