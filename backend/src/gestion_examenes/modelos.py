@@ -19,6 +19,7 @@ class Examen(Base):
     aula_id = Column(Integer, ForeignKey('aulas.id'))
     grupo_id = Column(Integer, ForeignKey('grupos.id'))
     sinodal_id = Column(Integer, ForeignKey('profesores.id'), nullable=True) # Sinodal asignado
+    academia_id = Column(Integer, ForeignKey('academias.id'), nullable=True) 
 
     status = Column(String, default='borrador') # borrador, pendiente_aprobacion, aprobado, rechazado
     comentarios_rechazo = Column(Text, nullable=True)

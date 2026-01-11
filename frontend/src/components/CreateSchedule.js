@@ -50,13 +50,13 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
       .then(r => r.json())
       .then(setTipos)
       .catch(console.error);
-    
+
     // Fetch aulas
     fetch(`${API_URL}/aulas`)
       .then(r => r.json())
       .then(setAulas)
       .catch(() => setAulas([])); // Si no existe el endpoint, dejar vacío
-    
+
     // Fetch academias
     fetch(`${API_URL}/academias`)
       .then(r => r.json())
@@ -76,7 +76,7 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
         .then(r => r.json())
         .then(setMaterias)
         .catch(console.error);
-      
+
       // Fetch grupos de la carrera
       fetch(`${API_URL}/carreras`)
         .then(r => r.json())
@@ -97,37 +97,37 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
     const { name, value } = e.target;
     setForm(prev => {
       const newForm = { ...prev, [name]: value };
-      
+
       // Si cambia el tipo de examen (Escrito/Digital), resetear aula_id
       if (name === 'tipo_examen_modalidad') {
         newForm.aula_id = '';
       }
-      
+
       return newForm;
     });
   };
 
   // Filtrar aulas según el tipo de examen
-  const aulasDisponibles = form.tipo_examen_modalidad === 'Digital' 
+  const aulasDisponibles = form.tipo_examen_modalidad === 'Digital'
     ? aulas.filter(a => a.tipo === 'Laboratorio')
     : form.tipo_examen_modalidad === 'Escrito'
-    ? aulas.filter(a => a.tipo === 'Normal' || a.tipo === 'Sala')
-    : aulas;
+      ? aulas.filter(a => a.tipo === 'Normal' || a.tipo === 'Sala')
+      : aulas;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validaciones según el diagrama de flujo
     if (!form.tipo_examen_modalidad) {
       alert('Por favor selecciona si el examen es Escrito o Digital');
       return;
     }
-    
+
     if (!form.aula_id) {
       alert(`Por favor selecciona una ${form.tipo_examen_modalidad === 'Digital' ? 'Laboratorio' : 'Aula'}`);
       return;
     }
-    
+
     // Build payload
     const payload = {
       carrera_id: form.carrera_id ? parseInt(form.carrera_id) : null,
@@ -152,7 +152,7 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        
+
         const msg = data && data.error ? data.error : 'Error creando examen';
         throw new Error(msg);
       }
@@ -162,7 +162,7 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
         if (typeof onCreated === 'function') onCreated(data);
         else window.location.reload();
       } else {
-        
+
         const msg = data && data.error ? data.error : 'Respuesta inesperada del servidor';
         throw new Error(msg);
       }
@@ -177,14 +177,19 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
       <div className="cs-modal">
         <div className="cs-header">
           <h3>Crear Horario / Examen</h3>
-          <button className="cs-close" onClick={onClose}>✕</button>
+          <button className="cs-close" onClick={onClose} title="Cerrar">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <form className="cs-form" onSubmit={handleSubmit}>
           <label>Carrera</label>
-          <select 
-            name="carrera_id" 
-            value={form.carrera_id} 
-            onChange={handleChange} 
+          <select
+            name="carrera_id"
+            value={form.carrera_id}
+            onChange={handleChange}
             required
             disabled={currentUser && currentUser.role === 'jefe_carrera'}
           >
@@ -230,10 +235,10 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
 
           {/* Pregunta del diagrama: Examen Escrito o Digital */}
           <label>Modalidad del Examen *</label>
-          <select 
-            name="tipo_examen_modalidad" 
-            value={form.tipo_examen_modalidad} 
-            onChange={handleChange} 
+          <select
+            name="tipo_examen_modalidad"
+            value={form.tipo_examen_modalidad}
+            onChange={handleChange}
             required
           >
             <option value="">Seleccionar modalidad</option>
@@ -248,10 +253,10 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
             </label>
           )}
           {form.tipo_examen_modalidad && (
-            <select 
-              name="aula_id" 
-              value={form.aula_id} 
-              onChange={handleChange} 
+            <select
+              name="aula_id"
+              value={form.aula_id}
+              onChange={handleChange}
               required
             >
               <option value="">Seleccionar {form.tipo_examen_modalidad === 'Digital' ? 'Laboratorio' : 'Aula'}</option>
@@ -264,11 +269,11 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
           )}
 
           <label>Periodo de Exámenes</label>
-          <input 
-            type="text" 
-            name="periodo_examen" 
-            value={form.periodo_examen} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="periodo_examen"
+            value={form.periodo_examen}
+            onChange={handleChange}
             placeholder="Ej: Enero-Junio 2024"
           />
 

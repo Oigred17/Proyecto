@@ -11,6 +11,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -32,6 +33,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -67,6 +69,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -307,9 +310,10 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background-color: white;
-  
+
   display: grid;
-  grid-template-columns: 100px repeat(6, minmax(120px, 1fr)); /* Time column + 6 days */
+  grid-template-columns: 100px repeat(6, minmax(120px, 1fr));
+  /* Time column + 6 days */
 }
 
 .calendar-grid {
@@ -321,7 +325,8 @@
 }
 
 .grid-header {
-  display: contents; /* Makes children participate in the grid layout */
+  display: contents;
+  /* Makes children participate in the grid layout */
 }
 
 .time-column-header,
@@ -333,14 +338,16 @@
   color: #4a5568;
   text-align: center;
   border-right: 1px solid #e2e8f0;
-  /* flex-shrink: 0; */ /* Important for flexbox, but not needed for grid item */
+  /* flex-shrink: 0; */
+  /* Important for flexbox, but not needed for grid item */
 }
 
 .time-column-header {
   position: sticky;
   left: 0;
   z-index: 10;
-  text-align: left; /* Align time header text to left */
+  text-align: left;
+  /* Align time header text to left */
   border-right: 1px solid #e2e8f0;
 }
 
@@ -366,7 +373,8 @@
 }
 
 .schedule-row {
-  display: contents; /* Makes children participate in the grid layout */
+  display: contents;
+  /* Makes children participate in the grid layout */
 }
 
 .time-column {
@@ -406,7 +414,8 @@
 }
 
 .schedule-cell {
-  min-height: 50px; /* Ensure cells have a minimum height */
+  min-height: 50px;
+  /* Ensure cells have a minimum height */
   padding: 5px;
   border-right: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
@@ -490,6 +499,7 @@
     opacity: 0;
     transform: scale(0.8) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -712,14 +722,15 @@
   font-size: 12px;
 }
 
-/* Notification Styles */
 .notification {
   position: fixed;
-  background-color: #333;
+  background-color: #48bb78;
+  /* Green for success/friendly */
   color: white;
-  padding: 15px 20px;
+  padding: 15px 25px;
+  /* More padding */
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
@@ -755,6 +766,111 @@
 }
 
 .notification::before {
-  content: '🔔'; /* Optional icon */
+  content: '🔔';
+  /* Optional icon */
   font-size: 1.2em;
+}
+
+/* --- ESTILOS DE BIENVENIDA (INICIO) --- */
+.welcome-container {
+  padding: 10px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.welcome-icon {
+  font-size: 60px;
+  animation: wave 2s infinite;
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(20deg);
+  }
+}
+
+.welcome-text h2 {
+  font-size: 1.8rem;
+  margin: 0 0 10px 0 !important;
+  color: #1a202c !important;
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+.welcome-text p {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.access-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.access-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  border-color: #805ad5;
+}
+
+.access-icon {
+  font-size: 32px;
+  background: #f7fafc;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.access-card:hover .access-icon {
+  transform: scale(1.1) rotate(5deg);
+  background: #f0fdf4;
+}
+
+.access-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #2d3748;
+}
+
+.access-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #718096;
+  line-height: 1.5;
 }

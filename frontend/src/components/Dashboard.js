@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
-import ExamScheduleDisplay from './ExamScheduleDisplay'; // Import the new component
-import UserManagement from './UserManagement'; // Import UserManagement component
-import SinodalesView from './SinodalesView'; // Import SinodalesView component
-import GenerateExamsModal from './GenerateExamsModal'; // Import GenerateExamsModal component
+import ExamReview from './ExamReview';
+import ExamScheduleDisplay from './ExamScheduleDisplay';
+import UserManagement from './UserManagement';
+import SinodalesView from './SinodalesView';
+import GenerateExamsModal from './GenerateExamsModal';
 import './Dashboard.css';
 
 // Helper function to get day of the week from YYYY-MM-DD string
@@ -28,6 +29,7 @@ function Dashboard({ currentUser, onLogout }) {
   const [notificationMessage, setNotificationMessage] = useState(''); // State for notification message
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false); // State for generate exams modal
+  const [notifications, setNotifications] = useState([]);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -37,50 +39,81 @@ function Dashboard({ currentUser, onLogout }) {
   const API_URL = `http://${window.location.hostname}:8000/api`;
 
   useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchNotifs, 30000); // Poll notifications every 30s
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
+  const fetchData = () => {
+    // Fetch initial data
     console.log('Fetching carreras...');
     fetch(`${API_URL}/carreras`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-        console.log('Carreras fetched:', data);
-
+        if (!Array.isArray(data)) {
+          console.error("Carreras fetch did not return an array:", data);
+          return;
+        }
         let filteredCarreras = data;
-
-        // Filtrar por rol de Jefe de Carrera
         if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           filteredCarreras = data.filter(c => c.nombre === currentUser.carrera);
-          // Auto-seleccionar la carrera siempre para jefe_carrera
           if (filteredCarreras.length > 0) {
             const carrera = filteredCarreras[0];
             setSelectedCarreraName(carrera.nombre);
             setSelectedCarreraId(carrera.id);
           }
         }
-
         setCarreras(filteredCarreras);
-        // Filtrar horarios solo de las carreras permitidas
-        const allHorarios = filteredCarreras.flatMap(carrera =>
-          carrera.grupos.flatMap(grupo =>
-            grupo.horarios.map(horario => ({
-              ...horario,
-              carrera_name: carrera.nombre, // Use carrera_name to avoid conflict
-              carrera_id: carrera.id,
-              grupo_name: grupo.nombre_grupo, // Use grupo_name
-              grupo_id: grupo.id,
-            }))
-          )
-        );
-        setHorarios(allHorarios);
 
+        // Safety check for mapping
+        const allHorarios = filteredCarreras.flatMap(carrera => {
+          if (!carrera || !carrera.grupos || !Array.isArray(carrera.grupos)) return [];
+          return carrera.grupos.flatMap(grupo => {
+            if (!grupo || !grupo.horarios || !Array.isArray(grupo.horarios)) return [];
+            return grupo.horarios.map(horario => ({
+              ...horario,
+              carrera_name: carrera.nombre,
+              carrera_id: carrera.id,
+              grupo_name: grupo.nombre_grupo,
+              grupo_id: grupo.id,
+            }));
+          });
+        });
+        setHorarios(allHorarios);
       })
       .catch(error => console.error('Error fetching carreras:', error));
 
     fetchExamenes();
-  }, [currentUser]);
+    fetchNotifs();
+  };
+
+  const fetchNotifs = () => {
+    if (!currentUser) return;
+    // Assuming backend has GET /api/notificaciones/?rol=...
+    const rol = currentUser.role;
+    let url = `${API_URL}/notificaciones/?rol=${rol}`;
+    if (currentUser.carrera) {
+      url += `&carrera=${encodeURIComponent(currentUser.carrera)}`;
+    }
+    fetch(url)
+      .then(r => {
+        if (r.ok) return r.json();
+        return [];
+      })
+      .then(data => setNotifications(data))
+      .catch(e => console.error(e));
+  };
+
+  const handleMarkAsRead = (id) => {
+    fetch(`${API_URL}/notificaciones/${id}/leer`, { method: 'PUT' })
+      .then(r => {
+        if (r.ok) {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }
+      })
+      .catch(e => console.error(e));
+  };
+
 
   const fetchExamenes = () => {
     console.log('Fetching examenes...');
@@ -93,41 +126,26 @@ function Dashboard({ currentUser, onLogout }) {
       })
       .then(data => {
         console.log('Examenes fetched:', data);
-
-        // Filtrar exámenes por carrera si es jefe_carrera
         let filteredData = data;
         if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           filteredData = data.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
         }
-
         setExamenes(filteredData);
       })
       .catch(error => console.error('Error fetching examenes:', error));
   };
 
   const handleGenerateExams = () => {
-    console.log('handleGenerateExams called');
-    console.log('selectedCarreraId:', selectedCarreraId);
-    console.log('currentUser:', currentUser);
-    console.log('carreras:', carreras);
-
-    // Para jefe_carrera, usar la carrera del usuario si no hay seleccionada
+    // ... same as before
     let carreraIdToUse = selectedCarreraId;
-
     if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-      console.log('Buscando carrera por nombre:', currentUser.carrera);
       const carrera = carreras.find(c => c.nombre === currentUser.carrera);
-      console.log('Carrera encontrada:', carrera);
       carreraIdToUse = carrera?.id;
     }
-
     if (!carreraIdToUse) {
-      console.warn('No se puede determinar la carrera para generar exámenes.');
-      alert('Por favor selecciona una carrera o verifica que tu usuario tenga una carrera asignada');
+      alert('Por favor selecciona una carrera');
       return;
     }
-
-    // Asegurar que selectedCarreraId esté establecido
     if (!selectedCarreraId && carreraIdToUse) {
       const carrera = carreras.find(c => c.id === carreraIdToUse);
       if (carrera) {
@@ -135,27 +153,25 @@ function Dashboard({ currentUser, onLogout }) {
         setSelectedCarreraName(carrera.nombre);
       }
     }
-
-    console.log('Opening generate modal with carreraId:', carreraIdToUse);
-    // Mostrar el modal de generación
     setShowGenerateModal(true);
   };
 
-  const handleGenerateFromModal = async (materiasData) => {
+  const handleGenerateFromModal = async (selectionData) => {
     try {
-      // Por ahora, generar exámenes para todas las materias seleccionadas
-      // Esto puede necesitar ajustarse según la lógica del backend
-      const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${selectedCarreraId}&grupo_id=${selectedGrupoId || 0}`, {
-        method: 'POST'
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || 'Error al generar exámenes');
+      let carreraIdToUse = selectedCarreraId;
+      if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+        const carrera = carreras.find(c => c.nombre === currentUser.carrera);
+        carreraIdToUse = carrera?.id;
       }
 
-      const data = await response.json();
-      console.log('Examenes generados y recibidos:', data);
+      const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${carreraIdToUse}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectionData)
+      });
+
+      if (!response.ok) throw new Error('Error al generar exámenes');
+
       fetchExamenes();
       setShowGenerateModal(false);
       setActiveView('Horarios');
@@ -163,15 +179,99 @@ function Dashboard({ currentUser, onLogout }) {
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000);
     } catch (error) {
-      console.error('Error generating exams:', error.message);
       alert(`Error al generar exámenes: ${error.message}`);
+    }
+  };
+
+  const handleEnviarRevision = async () => {
+    if (!selectedCarreraId) {
+      alert("Selecciona una carrera."); return;
+    }
+    // If no group selected, we assume ALL groups (backend handles this with 0 or None)
+    const grupoIdToSend = selectedGrupoIdForExamenes || 0;
+
+    // Confirmación al usuario
+    if (grupoIdToSend === 0) {
+      if (!window.confirm("¿Estás seguro de enviar a revisión los exámenes de TODOS los grupos pendientes de esta carrera?")) {
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/examenes/enviar-revision?carrera_id=${selectedCarreraId}&grupo_id=${grupoIdToSend}`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotificationMessage(data.message);
+        setShowNotification(true);
+        fetchExamenes(); // Update status
+        setTimeout(() => setShowNotification(false), 3000);
+      } else {
+        alert(data.message);
+      }
+    } catch (e) {
+      alert("Error de conexión");
+    }
+  };
+
+  const handleRevisionAction = async (accion) => {
+    if (!selectedCarreraId) {
+      alert("Selecciona una carrera."); return;
+    }
+
+    // Si no hay grupo seleccionado, asumimos General (0)
+    const grupoIdToSend = selectedGrupoIdForExamenes || 0;
+
+    let motivo = "";
+    let comentarios = "";
+
+    if (accion === 'rechazar') {
+      motivo = prompt("Motivo del rechazo (ej. Empalme, Aula no disponible):");
+      if (motivo === null) return; // Cancelled
+      comentarios = prompt("Observaciones adicionales (opcional):");
+    }
+
+    // Confirmación extra si es masivo
+    if (grupoIdToSend === 0) {
+      const actionName = accion === 'aprobar' ? "APROBAR" : "RECHAZAR";
+      if (!window.confirm(`¿Estás seguro de ${actionName} los exámenes de TODOS los grupos pendientes de esta carrera?`)) {
+        return;
+      }
+    }
+
+    const payload = {
+      carrera_id: selectedCarreraId,
+      grupo_id: grupoIdToSend,
+      accion: accion,
+      motivo: motivo,
+      comentarios: comentarios
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/examenes/revision-grupo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotificationMessage(accion === 'aprobar' ? "✅ Grupo Aprobado" : "❌ Grupo Rechazado");
+        setShowNotification(true);
+        fetchExamenes();
+        setTimeout(() => setShowNotification(false), 3000);
+      } else {
+        alert(data.message || "Error al procesar revisión");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error de conexión");
     }
   };
 
   const handleSelectView = (view) => {
     setActiveView(view);
   };
-
 
   const timeSlots = Array.from({ length: 14 }, (_, i) => {
     const hour = i + 7;
@@ -181,46 +281,43 @@ function Dashboard({ currentUser, onLogout }) {
   const weekDays = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
 
   const filteredHorarios = horarios.filter(h => {
-    // Si es jefe_carrera, solo mostrar horarios de su carrera
+    // ... same filters
     if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-      if (h.carrera_name !== currentUser.carrera) {
-        return false;
-      }
+      if (h.carrera_name !== currentUser.carrera) return false;
     }
-    // Filtros adicionales
     return (!selectedCarreraName || h.carrera_name === selectedCarreraName) &&
       (!selectedGrupoName || h.grupo_name === selectedGrupoName);
   });
 
   const filteredExamenes = examenes.filter(e => {
-    // Si es jefe_carrera, solo mostrar exámenes de su carrera
     if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-      if (!e.materia || e.materia.carrera_nombre !== currentUser.carrera) {
-        return false;
-      }
+      if (!e.materia || e.materia.carrera_nombre !== currentUser.carrera) return false;
     }
-    // Filtros adicionales
     const matchesCareer = !selectedCarreraName || (e.materia && e.materia.carrera_nombre === selectedCarreraName);
-
-    // Filter by group if selected in the Calendar header controls
-    const matchesGroup = !selectedGrupoId || (e.grupo_id === selectedGrupoId);
-
+    let matchesGroup = true;
+    if (activeView === 'Calendario') {
+      matchesGroup = !selectedGrupoId || (e.grupo_id === selectedGrupoId);
+    } else if (activeView === 'Horarios') {
+      if (selectedGrupoIdForExamenes) {
+        matchesGroup = e.grupo_id === selectedGrupoIdForExamenes;
+      } else {
+        matchesGroup = true; // Show all if none selected
+      }
+    } else if (activeView === 'Rechazados') {
+      // Show only rejected
+      return matchesCareer && e.status === 'rechazado';
+    }
     return matchesCareer && matchesGroup;
   });
 
-  console.log('Filtered Horarios:', filteredHorarios);
-  console.log('Filtered Examenes:', filteredExamenes);
-
   const getEventForCell = (day, time) => {
+    // ... same
     const formatTime = (t) => t.slice(0, 5);
     const formattedTime = formatTime(time);
-
-    // Find all exams that match this day and time
     const exams = filteredExamenes.filter(e => {
       const examDay = getDayOfWeek(e.fecha);
       return examDay === day && formatTime(e.hora_inicio) === formattedTime;
     });
-
     if (exams.length > 0) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
@@ -234,12 +331,9 @@ function Dashboard({ currentUser, onLogout }) {
         </div>
       );
     }
-
-    // Previous class schedule logic removed as requested
     return null;
   };
 
-  // Filtrar carreras según el rol
   let carrerasToShow = carreras;
   if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
     carrerasToShow = carreras.filter(c => c.nombre === currentUser.carrera);
@@ -253,7 +347,13 @@ function Dashboard({ currentUser, onLogout }) {
 
   return (
     <div className="dashboard">
-      <Header currentUser={currentUser} onLogout={onLogout} onMenuToggle={toggleSidebar} />
+      <Header
+        currentUser={currentUser}
+        onLogout={onLogout}
+        onMenuToggle={toggleSidebar}
+        notifications={notifications}
+        onMarkAsRead={handleMarkAsRead}
+      />
 
       <div className="dashboard-content">
         <Sidebar activeView={activeView} onSelectView={handleSelectView} isCollapsed={isSidebarCollapsed} currentUser={currentUser} />
@@ -261,13 +361,19 @@ function Dashboard({ currentUser, onLogout }) {
         <main className="main-content">
           <div className="content-header">
             <div>
-              <h1>Horario de Exámenes</h1>
-              <p className="subtitle">
-                {selectedCarreraName && selectedGrupoName
-                  ? `${selectedCarreraName} - ${selectedGrupoName}`
-                  : `Selecciona Carrera y Grupo`
-                }
-              </p>
+              <h1>{
+                activeView === 'Inicio' ? 'Bienvenido' :
+                  activeView === 'Calendario' ? 'Horario de Exámenes' :
+                    activeView === 'Horarios' ? 'Gestión de Horarios' :
+                      activeView === 'Revisiones' ? 'Revisión (Servicios Escolares)' :
+                        activeView === 'Rechazados' ? 'Exámenes Rechazados' :
+                          activeView
+              }</h1>
+              {activeView === 'Calendario' && (
+                <p className="subtitle">
+                  {selectedCarreraName && selectedGrupoName ? `${selectedCarreraName} - ${selectedGrupoName}` : `Selecciona Carrera y Grupo`}
+                </p>
+              )}
             </div>
             {activeView === 'Calendario' && (
               <div className="header-controls">
@@ -323,22 +429,14 @@ function Dashboard({ currentUser, onLogout }) {
                 <div className="grid-header">
                   <div className="time-column-header">Hora</div>
                   {weekDays.map(day => (
-                    <div key={day} className="day-header">
-                      <div className="day-name">{day}</div>
-                    </div>
+                    <div key={day} className="day-header"><div className="day-name">{day}</div></div>
                   ))}
                 </div>
-
                 {timeSlots.map(time => (
                   <div key={time} className="schedule-row">
-                    <div className="time-column">
-                      <div className="time-display">{time}</div>
-                    </div>
+                    <div className="time-column"><div className="time-display">{time}</div></div>
                     {weekDays.map(day => (
-                      <div
-                        key={`${day}-${time}`}
-                        className="schedule-cell"
-                      >
+                      <div key={`${day}-${time}`} className="schedule-cell">
                         {getEventForCell(day, time)}
                       </div>
                     ))}
@@ -346,27 +444,32 @@ function Dashboard({ currentUser, onLogout }) {
                 ))}
               </div>
             )}
+
             {activeView === 'Horarios' && (
-              <>
-                <div className="examenes-filter-controls" style={{ marginBottom: '20px' }}>
-                  { }
+              <ExamScheduleDisplay
+                examenes={filteredExamenes.filter(e => e.status !== 'rechazado' && e.status !== 'aprobado')}
+                // Only show workable exams here. Rejected go to Rejected tab if specific. 
+                // Wait, user might want to see approved ones? Yes. So filter appropriately.
+                // Let's modify filterExamenes logic or just show all non-rejected here?
+                // Actually approved is fine. Rejected should be in "Rechazados" if separate view.
+                onRefresh={fetchExamenes}
+                title={selectedCarreraName ? selectedCarreraName.toUpperCase() : "HORARIOS DE EXÁMENES"}
+              >
+                <div className="examenes-filter-controls">
                   <select
                     className="career-select"
                     value={selectedCarreraName}
                     onChange={(e) => {
                       const name = e.target.value;
                       setSelectedCarreraName(name);
-
                       setSelectedGrupoIdForExamenes(null);
                     }}
                   >
-                    <option value="">Todas las Carreras</option>
+                    <option value="">Seleccionar Carrera</option>
                     {uniqueCarreras.map(career => (
                       <option key={career.id} value={career.nombre}>{career.nombre}</option>
                     ))}
                   </select>
-
-                  { }
                   <select
                     className="group-select"
                     value={selectedGrupoIdForExamenes || ''}
@@ -380,30 +483,138 @@ function Dashboard({ currentUser, onLogout }) {
                         <option key={group.id} value={group.id}>{group.nombre_grupo}</option>
                       ))}
                   </select>
+                  {currentUser && currentUser.role === 'jefe_carrera' && (
+                    <button className="plan-button" onClick={handleEnviarRevision} style={{ marginLeft: '20px' }}>
+                      Guardar y Enviar
+                    </button>
+                  )}
+                  {currentUser && currentUser.role === 'servicios_escolares' && selectedGrupoIdForExamenes && (
+                    <div style={{ display: 'flex', gap: '10px', marginLeft: '20px', alignItems: 'center' }}>
+                      <button className="btn-save" onClick={() => handleRevisionAction('aprobar')} style={{ backgroundColor: '#48bb78', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        Aprobar Grupo
+                      </button>
+                      <button className="btn-cancel" onClick={() => handleRevisionAction('rechazar')} style={{ backgroundColor: '#e53e3e', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        Rechazar Grupo
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <ExamScheduleDisplay examenes={filteredExamenes} />
-              </>
+              </ExamScheduleDisplay>
             )}
-            {activeView === 'Usuarios' && (
-              <UserManagement />
+
+            {activeView === 'Rechazados' && (
+              <ExamScheduleDisplay
+                examenes={filteredExamenes.filter(e => e.status === 'rechazado')}
+                onRefresh={fetchExamenes}
+                title="EXÁMENES RECHAZADOS (CORREGIR)"
+              >
+                <div className="examenes-filter-controls">
+                  <select
+                    className="career-select"
+                    value={selectedCarreraName}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setSelectedCarreraName(name);
+                      setSelectedCarreraId(carreras.find(c => c.nombre === name)?.id || null);
+                    }}
+                  >
+                    <option value="">Seleccionar Carrera</option>
+                    {uniqueCarreras.map(career => (
+                      <option key={career.id} value={career.nombre}>{career.nombre}</option>
+                    ))}
+                  </select>
+                  {currentUser && currentUser.role === 'jefe_carrera' && selectedCarreraId && (
+                    <button className="plan-button" onClick={handleEnviarRevision} style={{ marginLeft: '20px', backgroundColor: '#ed8936' }}>
+                      Re-enviar a Revisión
+                    </button>
+                  )}
+                </div>
+              </ExamScheduleDisplay>
             )}
-            {activeView === 'Sinodal' && (
-              <SinodalesView currentUser={currentUser} />
+
+            {activeView === 'Revisiones' && (
+              <ExamReview currentUser={currentUser} API_URL={API_URL} />
             )}
-            {activeView !== 'Calendario' && activeView !== 'Horarios' && activeView !== 'Usuarios' && activeView !== 'Sinodal' && (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#718096' }}>
-                Selecciona una opción de la barra lateral para ver el contenido.
+
+            {activeView === 'Usuarios' && <UserManagement />}
+            {activeView === 'Sinodal' && <SinodalesView currentUser={currentUser} />}
+
+            {activeView === 'Inicio' && (
+              <div className="welcome-container">
+                <div className="welcome-card">
+                  <div className="welcome-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div className="welcome-text">
+                    <h2>¡Bienvenido al Sistema de Gestión de Exámenes, {currentUser ? currentUser.username : 'Usuario'}!</h2>
+                    <p>Aquí podrás gestionar tus horarios, calendarios y revisiones de forma eficiente.</p>
+                  </div>
+                </div>
+
+                <div className="quick-access-grid">
+                  <div className="access-card" onClick={() => setActiveView('Calendario')}>
+                    <div className="access-icon">
+                      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                    <h3>Calendario</h3>
+                    <p>Visualiza y planifica los horarios de exámenes.</p>
+                  </div>
+                  <div className="access-card" onClick={() => setActiveView('Horarios')}>
+                    <div className="access-icon">
+                      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                    </div>
+                    <h3>Gestión</h3>
+                    <p>Modifica fechas y aulas de los exámenes.</p>
+                  </div>
+                  {currentUser && (currentUser.role === 'servicios_escolares') && (
+                    <div className="access-card" onClick={() => setActiveView('Revisiones')}>
+                      <div className="access-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                      </div>
+                      <h3>Revisiones</h3>
+                      <p>Aprueba o rechaza solicitudes pendientes.</p>
+                    </div>
+                  )}
+                  {currentUser && currentUser.role === 'jefe_carrera' && (
+                    <div className="access-card" onClick={() => setActiveView('Sinodal')}>
+                      <div className="access-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                      </div>
+                      <h3>Sinodales</h3>
+                      <p>Asigna sinodales a los exámenes de tu carrera.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
         </main>
       </div>
       {showNotification && (
-        <div className="notification bottom-right">
+        <div className={`notification bottom-right ${showNotification ? 'show' : ''}`}>
           {notificationMessage}
         </div>
       )}
-      {showGenerateModal && (selectedCarreraId || (currentUser && currentUser.role === 'jefe_carrera' && carreras.find(c => c.nombre === currentUser.carrera)?.id)) && (
+      {showGenerateModal && (
         <GenerateExamsModal
           onClose={() => setShowGenerateModal(false)}
           onGenerate={handleGenerateFromModal}

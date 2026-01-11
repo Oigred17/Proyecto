@@ -10,11 +10,13 @@ from .autenticacion import modelos as modelos_auth
 from .gestion_academica import modelos as modelos_aca
 from .gestion_horarios import modelos as modelos_hor
 from .gestion_examenes import modelos as modelos_exam
+from .notificaciones import modelos as modelos_notif
 
 # Importar rutas
 from .autenticacion import rutas as rutas_auth
 from .gestion_academica import rutas as rutas_aca
 from .gestion_examenes import rutas as rutas_exam
+from .notificaciones import rutas as rutas_notif
 
 # Crear tablas
 Base.metadata.create_all(bind=engine)
@@ -37,6 +39,7 @@ app.add_middleware(
 app.include_router(rutas_auth.router)
 app.include_router(rutas_aca.router)
 app.include_router(rutas_exam.router)
+app.include_router(rutas_notif.router)
 
 @app.get("/")
 def read_root():

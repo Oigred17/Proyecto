@@ -16,8 +16,8 @@ def crear_usuarios_prueba():
     db = SessionLocal()
     
     try:
-        # Definir los usuarios de prueba
-        usuarios = [
+        # 1. Crear usuarios fijos
+        fijos = [
             {
                 "username": "admin",
                 "password": "admin123",
@@ -29,49 +29,64 @@ def crear_usuarios_prueba():
                 "password": "escolares123",
                 "role": "servicios_escolares",
                 "email": "escolares@escuela.edu.mx"
-            },
-            {
-                "username": "jefe_informatica",
-                "password": "jefe123",
-                "role": "jefe_carrera",
-                "email": "jefe.informatica@escuela.edu.mx",
-                "carrera": "Licenciatura en Informática"
-            },
-            {
-                "username": "jefe_enfermeria",
-                "password": "enfermeria123",
-                "role": "jefe_carrera",
-                "email": "jefe.enfermeria@escuela.edu.mx",
-                "carrera": "Licenciatura en Enfermería"
             }
         ]
         
         usuarios_creados = 0
         usuarios_existentes = 0
         
-        for user_data in usuarios:
-            # Verificar si el usuario ya existe
-            existing_user = db.query(User).filter(User.username == user_data["username"]).first()
-            
-            if existing_user:
-                print(f"✓ Usuario '{user_data['username']}' ya existe")
-                usuarios_existentes += 1
-            else:
-                # Crear nuevo usuario
-                new_user = User(
-                    username=user_data["username"],
-                    hashed_password=obtener_hash_password(user_data["password"]),
-                    role=user_data["role"],
-                    email=user_data.get("email"),
-                    carrera=user_data.get("carrera"),
+        for u_data in fijos:
+            existing = db.query(User).filter(User.username == u_data["username"]).first()
+            if not existing:
+                new_u = User(
+                    username=u_data["username"],
+                    hashed_password=obtener_hash_password(u_data["password"]),
+                    role=u_data["role"],
+                    email=u_data["email"],
                     is_active=1
                 )
-                db.add(new_user)
-                print(f"✓ Usuario '{user_data['username']}' creado exitosamente")
-                print(f"  - Contraseña: {user_data['password']}")
-                print(f"  - Rol: {user_data['role']}")
-                print(f"  - Email: {user_data['email']}")
+                db.add(new_u)
                 usuarios_creados += 1
+                print(f"✓ Usuario '{u_data['username']}' creado")
+            else:
+                usuarios_existentes += 1
+        
+        # 2. Crear Jefes de Carrera dinámicos
+        from sqlalchemy import text
+        res = db.execute(text("SELECT nombre FROM carreras")).fetchall()
+        carreras = [r[0] for r in res]
+        
+        prefijos = {
+            "Licenciatura en Informática": "jefe_informatica",
+            "Licenciatura en Administración Municipal": "jefe_municipal",
+            "Licenciatura en Administración Pública": "jefe_publica"
+        }
+        
+        for name in carreras:
+            username = prefijos.get(name)
+            if not username:
+                clean = name.lower().replace("licenciatura en ", "").replace(" ", "_")
+                username = f"jefe_{clean}"
+            
+            existing = db.query(User).filter(User.username == username).first()
+            if not existing:
+                new_jefe = User(
+                    username=username,
+                    hashed_password=obtener_hash_password("jefe123"),
+                    role="jefe_carrera",
+                    email=f"{username}@escuela.edu.mx",
+                    carrera=name,
+                    is_active=1
+                )
+                db.add(new_jefe)
+                usuarios_creados += 1
+                print(f"✓ Usuario {username} creado para {name}")
+            else:
+                usuarios_existentes += 1
+                # Asegurar que tenga la carrera correcta si ya existe
+                if existing.carrera != name:
+                    existing.carrera = name
+                    print(f"Updated {username} career to {name}")
         
         db.commit()
         

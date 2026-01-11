@@ -19,7 +19,8 @@ def inicializar_base_datos():
                 'status': "VARCHAR(50) DEFAULT 'borrador'",
                 'comentarios_rechazo': "TEXT",
                 'fecha_envio': "DATE",
-                'fecha_aprobacion': "DATE"
+                'fecha_aprobacion': "DATE",
+                'academia_id': "INTEGER"
             }
 
             for col_name, col_type in columns_to_add.items():
@@ -55,6 +56,18 @@ def inicializar_base_datos():
                     db.commit()
                 except Exception as e:
                     print(f"[INIT DB] ERROR al agregar carrera: {e}")
+                    db.rollback()
+
+        # Verificar tabla notificaciones y columnas nuevas
+        if 'notificaciones' in tables:
+            columns = [col['name'] for col in inspector.get_columns('notificaciones')]
+            if 'carrera' not in columns:
+                print("[INIT DB] Agregando columna carrera a notificaciones...")
+                try:
+                    db.execute(text("ALTER TABLE notificaciones ADD COLUMN carrera VARCHAR"))
+                    db.commit()
+                except Exception as e:
+                    print(f"[INIT DB] ERROR al agregar carrera a notificaciones: {e}")
                     db.rollback()
                     
     except Exception as e:

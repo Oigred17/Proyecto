@@ -26,6 +26,12 @@ class ExamenCreate(BaseModel):
     grupo_id: int
     observaciones: Optional[str] = None
 
+class ExamenUpdate(BaseModel):
+    fecha: Optional[date] = None
+    hora_inicio: Optional[time] = None
+    hora_fin: Optional[time] = None
+    aula_id: Optional[int] = None
+
 class Examen(ExamenBase):
     id: int
     materia_id: int
