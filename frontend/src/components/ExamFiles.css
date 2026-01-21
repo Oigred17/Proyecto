@@ -1,0 +1,194 @@
+.exam-files {
+  padding: 20px;
+  background: #f8fafc;
+  min-height: calc(100vh - 100px);
+}
+
+.files-controls {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.print-button {
+  background: #4a5568;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.print-button:hover {
+  background: #2d3748;
+  transform: translateY(-1px);
+}
+
+/* Print Styles */
+@media print {
+
+  /* Ocultar TODO lo que no sea el reporte */
+  header,
+  .dashboard-header,
+  aside,
+  .sidebar,
+  .files-controls,
+  .welcome-card,
+  .notification,
+  .plan-button,
+  .no-exams {
+    display: none !important;
+  }
+
+  /* Resetear el contenedor principal para que ocupe toda la hoja */
+  body,
+  .dashboard,
+  .dashboard-content,
+  .main-content {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .exam-files {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+  }
+
+  .printable-report {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: letter;
+  }
+}
+
+.printable-report {
+  display: block;
+  /* Visible por defecto para vista previa */
+  background: white;
+  padding: 40px;
+  color: black;
+  font-family: 'Times New Roman', Times, serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  margin: 0 auto;
+  border: 1px solid #e2e8f0;
+}
+
+.report-header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.report-header img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+}
+
+.report-header h1 {
+  font-size: 16pt;
+  margin: 0;
+  font-weight: bold;
+}
+
+.report-header h2 {
+  font-size: 14pt;
+  margin: 5px 0;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.report-header h3 {
+  font-size: 12pt;
+  margin: 5px 0;
+  font-weight: bold;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  font-size: 9pt;
+}
+
+.report-table th {
+  background: #edf2f7;
+  border: 1px solid #000;
+  padding: 6px;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.report-table td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+.group-cell {
+  text-align: center;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.carrera-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #4a5568;
+}
+
+.carrera-card h3 {
+  margin: 0 0 10px 0;
+  color: #2d3748;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.no-exams {
+  text-align: center;
+  padding: 50px;
+  background: white;
+  border-radius: 12px;
+  color: #718096;
+}

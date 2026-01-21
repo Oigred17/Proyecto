@@ -54,39 +54,20 @@ Este proyecto contiene una aplicación web completa con un backend en Python (Fa
 
 3.  **Poblar la Base de Datos:**
     
-    Una vez que los contenedores estén corriendo, necesitas poblar la base de datos con usuarios y datos iniciales.
+    Una vez que los contenedores estén corriendo, necesitas inicializar y poblar la base de datos con un solo comando.
     
-    **Para Windows (PowerShell o CMD):**
+    **Comando Único (Windows/Linux/Mac):**
     ```bash
-    # Crear usuarios de prueba
-    docker exec backend_api python -c "from src.configuracion.crear_usuarios_prueba import crear_usuarios_prueba; crear_usuarios_prueba()"
-    
-    # Poblar datos académicos (carreras, materias, profesores, horarios)
-    docker exec backend_api python -c "from src.configuracion.poblar_datos import poblar; poblar()"
-    
-    # Verificar que los datos se poblaron correctamente
-    docker exec backend_api python -c "from src.configuracion.base_datos import SessionLocal; from sqlalchemy import text; db = SessionLocal(); users = db.execute(text('SELECT COUNT(*) FROM users')).scalar(); carreras = db.execute(text('SELECT COUNT(*) FROM carreras')).scalar(); print(f'Usuarios: {users}, Carreras: {carreras}'); db.close()"
+    docker exec backend_api python /app/setup.py --reset
     ```
     
-    **Para Linux/Mac (Bash):**
-    ```bash
-    # Crear usuarios de prueba
-    docker exec backend_api python -c "from src.configuracion.crear_usuarios_prueba import crear_usuarios_prueba; crear_usuarios_prueba()"
+    *Nota: El argumento `--reset` borrará cualquier dato previo y recreará las tablas. Si solo quieres actualizar datos sin borrar lo existente, quita el `--reset`.*
     
-    # Poblar datos académicos (carreras, materias, profesores, horarios)
-    docker exec backend_api python -c "from src.configuracion.poblar_datos import poblar; poblar()"
-    
-    # Verificar que los datos se poblaron correctamente
-    docker exec backend_api python -c "from src.configuracion.base_datos import SessionLocal; from sqlalchemy import text; db = SessionLocal(); users = db.execute(text('SELECT COUNT(*) FROM users')).scalar(); carreras = db.execute(text('SELECT COUNT(*) FROM carreras')).scalar(); print(f'Usuarios: {users}, Carreras: {carreras}'); db.close()"
-    ```
-    
-    **Datos que se crearán:**
-    - 5 usuarios de prueba (admin, escolares, jefe_informatica, jefe_enfermeria)
-    - 3 carreras (Informática, Administración Municipal, Administración Pública)
-    - 28 profesores
-    - 39 materias
-    - 9 grupos
-    - 224 horarios programados
+    **Datos que se crearán automáticamente:**
+    - Usuarios fijos (`admin`, `escolares`)
+    - Usuarios dinámicos para cada Jefe de Carrera.
+    - Estructura completa de Carreras, Profesores, Materias, Grupos y Horarios extraídos de `db/horarios/Horarios.md`.
+    - Academias vinculadas a cada materia.
 
 4.  **Verificar que todo funciona:**
     Puedes ver los logs de los contenedores para asegurarte de que no hay errores:
@@ -111,8 +92,14 @@ Para acceder al sistema, utiliza los siguientes usuarios con sus contraseñas:
 | :--- | :--- | :--- | :--- |
 | `admin` | `admin123` | Administrador | Acceso total, incluyendo gestión de usuarios. |
 | `escolares` | `escolares123` | Servicios Escolares | Acceso a todo el contenido, excepto gestión de usuarios. |
+| `jefe_administracion_publica` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Administración Pública". |
+| `jefe_ciencias_biomedicas` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Ciencias Biomédicas". |
+| `jefe_ciencias_empresariales` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Ciencias Empresariales". |
+| `jefe_enfermeria` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Enfermería". |
 | `jefe_informatica` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Informática". |
-| `jefe_enfermeria` | `enfermeria123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Enfermería". |
+| `jefe_medicina` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Medicina". |
+| `jefe_nutricion` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Nutrición". |
+| `jefe_odontologia` | `jefe123` | Jefe de Carrera | Acceso limitado a "Licenciatura en Odontología". |
 
 ## Acceder a los Servicios
 

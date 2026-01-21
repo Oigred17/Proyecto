@@ -1,3 +1,7 @@
+/**
+ * Componente de inicio de sesión.
+ * Formulario de autenticación con diseño moderno y animaciones.
+ */
 import React, { useState } from 'react';
 import './Login.css';
 
@@ -13,7 +17,6 @@ function Login({ onLogin }) {
 
     if (onLogin) {
       const success = await onLogin({ username, password });
-      // Only re-enable button if login failed
       if (!success) {
         setIsSubmitting(false);
       }
@@ -24,16 +27,13 @@ function Login({ onLogin }) {
 
   return (
     <div className="login-container">
-      {/* Animated Background */}
       <div className="login-bg">
         <div className="bg-shape shape-1"></div>
         <div className="bg-shape shape-2"></div>
         <div className="bg-shape shape-3"></div>
       </div>
 
-      {/* Login Card */}
       <div className="login-card">
-        {/* Logo Section */}
         <div className="login-logo-section">
           <div className="logo-circle">
             <img src="/logounsis.png" alt="UNSIS Logo" className="university-logo" />
@@ -42,13 +42,11 @@ function Login({ onLogin }) {
           <p className="brand-subtitle">Sistema de Gestión Escolar</p>
         </div>
 
-        {/* Form Section */}
         <div className="login-form-section">
           <h2>Iniciar Sesión</h2>
           <p className="form-description">Ingresa tus credenciales para continuar</p>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {/* Username Input */}
             <div className="form-field">
               <label htmlFor="username">Usuario</label>
               <div className="input-group">
@@ -69,7 +67,6 @@ function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Password Input */}
             <div className="form-field">
               <label htmlFor="password">Contraseña</label>
               <div className="input-group">
@@ -107,7 +104,6 @@ function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Remember & Forgot */}
             <div className="form-options">
               <label className="remember-me">
                 <input type="checkbox" />
@@ -116,7 +112,6 @@ function Login({ onLogin }) {
               <a href="#forgot" className="forgot-link">¿Olvidaste tu contraseña?</a>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className={`submit-btn ${isSubmitting ? 'loading' : ''}`}
@@ -138,7 +133,6 @@ function Login({ onLogin }) {
             </button>
           </form>
 
-          {/* Footer Note */}
           <div className="login-footer">
             <p>Universidad de la Sierra Sur</p>
             <p className="footer-small">Todos los derechos reservados © 2025</p>

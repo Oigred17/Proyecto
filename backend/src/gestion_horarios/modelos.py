@@ -1,11 +1,13 @@
+"""Modelos de gestión de horarios."""
 from sqlalchemy import Column, Integer, String, Time, ForeignKey
 from sqlalchemy.orm import relationship
 from ..compartido.modelos_base import Base
 
 class Horario(Base):
+    """Modelo de horario de clases."""
     __tablename__ = 'horarios'
     id = Column(Integer, primary_key=True, index=True)
-    dia_semana = Column(String) # e.g., 'LUNES'
+    dia_semana = Column(String)
     hora_inicio = Column(Time)
     hora_fin = Column(Time)
     grupo_id = Column(Integer, ForeignKey('grupos.id'))

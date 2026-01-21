@@ -1,0 +1,1052 @@
+[
+  {
+    "clave": "1",
+    "nombre": "A1",
+    "capacidad": 18,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "2",
+    "nombre": "A2",
+    "capacidad": 21,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "3",
+    "nombre": "A3",
+    "capacidad": 20,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "95",
+    "nombre": "A4",
+    "capacidad": 15,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "155",
+    "nombre": "AUDITORIO",
+    "capacidad": 800,
+    "tipo": "AUDITORIO",
+    "statusProyector": "SI"
+  },
+  {
+    "clave": "4",
+    "nombre": "B1",
+    "capacidad": 15,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "5",
+    "nombre": "B2",
+    "capacidad": 10,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "6",
+    "nombre": "B3",
+    "capacidad": 16,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "7",
+    "nombre": "B4",
+    "capacidad": 12,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "116",
+    "nombre": "BIBLIOTECA",
+    "capacidad": 72,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "129",
+    "nombre": "BIBLIOTECA A",
+    "capacidad": 10,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "99",
+    "nombre": "BIBLIOTECA B",
+    "capacidad": 9,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "98",
+    "nombre": "BIBLIOTECA C",
+    "capacidad": 13,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "8",
+    "nombre": "C1",
+    "capacidad": 16,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "9",
+    "nombre": "C2",
+    "capacidad": 22,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "10",
+    "nombre": "C3",
+    "capacidad": 5,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "11",
+    "nombre": "C4",
+    "capacidad": 20,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "115",
+    "nombre": "CAD-ALMACEN ANATOMIA",
+    "capacidad": 32,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "111",
+    "nombre": "CAD-ANATOMIA DIGITAL",
+    "capacidad": 65,
+    "tipo": "SALA DE COMPUTO",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "113",
+    "nombre": "CAD-MORFOLOGIA",
+    "capacidad": 30,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "114",
+    "nombre": "CAD-OSTEOTECA",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "112",
+    "nombre": "CAD-SALA DE MODELOS",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "117",
+    "nombre": "CCR1",
+    "capacidad": 64,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "118",
+    "nombre": "CCR2",
+    "capacidad": 60,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "154",
+    "nombre": "CEDGE-CABILDOS",
+    "capacidad": 50,
+    "tipo": "LABORATORIO",
+    "statusProyector": "SI"
+  },
+  {
+    "clave": "151",
+    "nombre": "CEDGE-DO",
+    "capacidad": 30,
+    "tipo": "SALA",
+    "statusProyector": null
+  },
+  {
+    "clave": "152",
+    "nombre": "CEDGE-SIG",
+    "capacidad": 30,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "128",
+    "nombre": "CEO-AULA",
+    "capacidad": 35,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "126",
+    "nombre": "CEO-CLINICA1",
+    "capacidad": 36,
+    "tipo": "CLINICA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "127",
+    "nombre": "CEO-SALA",
+    "capacidad": 42,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "70",
+    "nombre": "CETI - DES. SOFTWARE",
+    "capacidad": 20,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "92",
+    "nombre": "CETI - IHC",
+    "capacidad": 10,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "72",
+    "nombre": "CETI - ING. SOFTWARE",
+    "capacidad": 20,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "73",
+    "nombre": "CETI - REDES",
+    "capacidad": 20,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "71",
+    "nombre": "CETI - S.O.",
+    "capacidad": 20,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "69",
+    "nombre": "CETI - TEC WEB",
+    "capacidad": 20,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "60",
+    "nombre": "CINA",
+    "capacidad": 13,
+    "tipo": "AULA_ESC",
+    "statusProyector": null
+  },
+  {
+    "clave": "110",
+    "nombre": "CO-AULA CLINICA",
+    "capacidad": 38,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "143",
+    "nombre": "CPAT-SALA",
+    "capacidad": 24,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "83",
+    "nombre": "CUBO 11",
+    "capacidad": 1,
+    "tipo": "CUBO",
+    "statusProyector": null
+  },
+  {
+    "clave": "84",
+    "nombre": "CUBO 12",
+    "capacidad": 1,
+    "tipo": "CUBO",
+    "statusProyector": null
+  },
+  {
+    "clave": "12",
+    "nombre": "D1",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "13",
+    "nombre": "D2",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "14",
+    "nombre": "D3",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "15",
+    "nombre": "D4",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "16",
+    "nombre": "D5",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "17",
+    "nombre": "D6",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "18",
+    "nombre": "D7",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "19",
+    "nombre": "D8",
+    "capacidad": 45,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "20",
+    "nombre": "D9",
+    "capacidad": 46,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "21",
+    "nombre": "DEP1",
+    "capacidad": 15,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "22",
+    "nombre": "DEP2",
+    "capacidad": 2,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "23",
+    "nombre": "DEP3",
+    "capacidad": 3,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "57",
+    "nombre": "DEP4",
+    "capacidad": 2,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "24",
+    "nombre": "DEP5",
+    "capacidad": 18,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "25",
+    "nombre": "DEP6",
+    "capacidad": 4,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "26",
+    "nombre": "DEP7",
+    "capacidad": 5,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "58",
+    "nombre": "DEP8",
+    "capacidad": 6,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "59",
+    "nombre": "DEP9",
+    "capacidad": 1,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "27",
+    "nombre": "E1",
+    "capacidad": 37,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "28",
+    "nombre": "E2",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "29",
+    "nombre": "E3",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "30",
+    "nombre": "E4",
+    "capacidad": 70,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "31",
+    "nombre": "E5",
+    "capacidad": 83,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "32",
+    "nombre": "E6",
+    "capacidad": 41,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "33",
+    "nombre": "E7",
+    "capacidad": 31,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "34",
+    "nombre": "E8",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "35",
+    "nombre": "F1",
+    "capacidad": 30,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "36",
+    "nombre": "F2",
+    "capacidad": 23,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "37",
+    "nombre": "F3",
+    "capacidad": 22,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "38",
+    "nombre": "F4",
+    "capacidad": 34,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "39",
+    "nombre": "F5",
+    "capacidad": 36,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "40",
+    "nombre": "F6",
+    "capacidad": 34,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "41",
+    "nombre": "F7",
+    "capacidad": 34,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "42",
+    "nombre": "F8",
+    "capacidad": 28,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "43",
+    "nombre": "F9",
+    "capacidad": 29,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "62",
+    "nombre": "G1",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "63",
+    "nombre": "G2",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "64",
+    "nombre": "G3",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "65",
+    "nombre": "G4",
+    "capacidad": 46,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "66",
+    "nombre": "G5",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "67",
+    "nombre": "G6",
+    "capacidad": 47,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "68",
+    "nombre": "G7",
+    "capacidad": 44,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "85",
+    "nombre": "H1",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "86",
+    "nombre": "H2",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "87",
+    "nombre": "H3",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "88",
+    "nombre": "H4",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "89",
+    "nombre": "H5",
+    "capacidad": 43,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "90",
+    "nombre": "H6",
+    "capacidad": 33,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "91",
+    "nombre": "H7",
+    "capacidad": 47,
+    "tipo": "AULA",
+    "statusProyector": "SI_FUNCIONA"
+  },
+  {
+    "clave": "101",
+    "nombre": "I1",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "102",
+    "nombre": "I2",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "103",
+    "nombre": "I3",
+    "capacidad": 39,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "104",
+    "nombre": "I4",
+    "capacidad": 33,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "105",
+    "nombre": "I5",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "106",
+    "nombre": "I6",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "107",
+    "nombre": "I7",
+    "capacidad": 39,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "108",
+    "nombre": "I8",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "109",
+    "nombre": "I9",
+    "capacidad": 37,
+    "tipo": "AULA",
+    "statusProyector": "si"
+  },
+  {
+    "clave": "132",
+    "nombre": "J1",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "133",
+    "nombre": "J2",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "134",
+    "nombre": "J3",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "135",
+    "nombre": "J4",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "136",
+    "nombre": "J5",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "137",
+    "nombre": "J6",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "138",
+    "nombre": "J7",
+    "capacidad": 47,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "144",
+    "nombre": "K1",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "145",
+    "nombre": "K2",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "146",
+    "nombre": "K3",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "147",
+    "nombre": "K4",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "148",
+    "nombre": "K5",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "149",
+    "nombre": "K6",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "150",
+    "nombre": "K7",
+    "capacidad": 48,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "53",
+    "nombre": "LAB INFO",
+    "capacidad": 15,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "93",
+    "nombre": "LABORATORIO BIOLOGIA",
+    "capacidad": 37,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "94",
+    "nombre": "LABORATORIO QUIMICA",
+    "capacidad": 37,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "75",
+    "nombre": "LGE",
+    "capacidad": 24,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "44",
+    "nombre": "M1",
+    "capacidad": 11,
+    "tipo": "OFICINA",
+    "statusProyector": null
+  },
+  {
+    "clave": "45",
+    "nombre": "M2",
+    "capacidad": 11,
+    "tipo": "AULA",
+    "statusProyector": "NO_FUNCIONA"
+  },
+  {
+    "clave": "74",
+    "nombre": "M3",
+    "capacidad": 40,
+    "tipo": "AULA_ESC",
+    "statusProyector": null
+  },
+  {
+    "clave": "119",
+    "nombre": "PARANINFO",
+    "capacidad": 75,
+    "tipo": "PARANINFO",
+    "statusProyector": null
+  },
+  {
+    "clave": "46",
+    "nombre": "SALA 1",
+    "capacidad": 23,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "141",
+    "nombre": "SALA 10",
+    "capacidad": 36,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": ""
+  },
+  {
+    "clave": "142",
+    "nombre": "SALA 11",
+    "capacidad": 34,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": ""
+  },
+  {
+    "clave": "120",
+    "nombre": "SALA 1 - CPAT",
+    "capacidad": 33,
+    "tipo": "SALA",
+    "statusProyector": null
+  },
+  {
+    "clave": "47",
+    "nombre": "SALA 2",
+    "capacidad": 24,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "121",
+    "nombre": "SALA 2 - CPAT",
+    "capacidad": 32,
+    "tipo": "SALA",
+    "statusProyector": null
+  },
+  {
+    "clave": "48",
+    "nombre": "SALA 3",
+    "capacidad": 24,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "49",
+    "nombre": "SALA 4",
+    "capacidad": 27,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "50",
+    "nombre": "SALA 5",
+    "capacidad": 28,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "51",
+    "nombre": "SALA 6",
+    "capacidad": 28,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "52",
+    "nombre": "SALA 7",
+    "capacidad": 22,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "96",
+    "nombre": "SALA 8",
+    "capacidad": 35,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": ""
+  },
+  {
+    "clave": "97",
+    "nombre": "SALA 9",
+    "capacidad": 36,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": ""
+  },
+  {
+    "clave": "153",
+    "nombre": "SALA-BIBLIOTECA 1",
+    "capacidad": 64,
+    "tipo": "SALA",
+    "statusProyector": null
+  },
+  {
+    "clave": "131",
+    "nombre": "SALA-CAD",
+    "capacidad": 23,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "130",
+    "nombre": "SALA-CEDGE",
+    "capacidad": 24,
+    "tipo": "SALA_DE_CÓMPUTO",
+    "statusProyector": null
+  },
+  {
+    "clave": "61",
+    "nombre": "SALA DE MEZCLAS",
+    "capacidad": 35,
+    "tipo": "AULA_ESC",
+    "statusProyector": null
+  },
+  {
+    "clave": "100",
+    "nombre": "SALA ODONT.",
+    "capacidad": 28,
+    "tipo": "AULA",
+    "statusProyector": ""
+  },
+  {
+    "clave": "76",
+    "nombre": "SALA TESISTA",
+    "capacidad": 24,
+    "tipo": "AULA_ESC",
+    "statusProyector": null
+  },
+  {
+    "clave": "55",
+    "nombre": "SIS DIG",
+    "capacidad": 10,
+    "tipo": "LABORATORIO",
+    "statusProyector": null
+  },
+  {
+    "clave": "77",
+    "nombre": "SJIDIOMAS",
+    "capacidad": 10,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "78",
+    "nombre": "SJIEM",
+    "capacidad": 10,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "79",
+    "nombre": "SJINFO",
+    "capacidad": 10,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "80",
+    "nombre": "SJNUTR",
+    "capacidad": 10,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "81",
+    "nombre": "SJSP",
+    "capacidad": 10,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "82",
+    "nombre": "SJVA",
+    "capacidad": 5,
+    "tipo": "SALA_DE_JUNTAS",
+    "statusProyector": null
+  },
+  {
+    "clave": "201",
+    "nombre": "W1",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "202",
+    "nombre": "W2",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": null
+  },
+  {
+    "clave": "203",
+    "nombre": "W3",
+    "capacidad": 40,
+    "tipo": "AULA",
+    "statusProyector": null
+  }
+]

@@ -172,7 +172,20 @@ const ExamReview = ({ currentUser, API_URL }) => {
                                                 <td className="td-profesor">{ex.materia.profesor ? ex.materia.profesor.nombre : 'S/A'}</td>
                                                 <td className="td-fecha">{new Date(ex.fecha + 'T00:00:00').toLocaleDateString()}</td>
                                                 <td className="td-hora">{ex.hora_inicio.slice(0, 5)} - {ex.hora_fin.slice(0, 5)}</td>
-                                                <td className="td-aula">{ex.aula ? ex.aula.nombre : 'N/A'}</td>
+                                                <td className="td-aula">
+                                                    {ex.aula ? ex.aula.nombre : 'N/A'}
+                                                    {ex.tiene_conflictos && (
+                                                        <div className="conflict-badge" title={ex.detalles_conflicto} style={{
+                                                            display: 'inline-block', marginLeft: '8px', color: '#ef4444', cursor: 'help'
+                                                        }}>
+                                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

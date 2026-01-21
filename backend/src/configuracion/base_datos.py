@@ -1,11 +1,10 @@
+"""Configuración de la base de datos del sistema."""
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Usar variable de entorno o SQLite por defecto
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./horarios.db")
 
-# Ajustes para SQLite
 connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
 engine = create_engine(
@@ -16,7 +15,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def obtener_db():
-    """Dependencia para obtener la sesión de base de datos"""
+    """Dependencia para obtener la sesión de base de datos."""
     db = SessionLocal()
     try:
         yield db

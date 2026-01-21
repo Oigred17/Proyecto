@@ -1,3 +1,7 @@
+/**
+ * Componente principal de la aplicación.
+ * Maneja la autenticación y renderiza Login o Dashboard según el estado.
+ */
 import React, { useState } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -11,15 +15,9 @@ function App() {
     try {
       const API_URL = `http://${window.location.hostname}:8000/api`;
 
-      console.log('=== LOGIN DEBUG ===');
-      console.log('API URL:', API_URL);
-      console.log('Username:', credentials.username);
-
       const formData = new URLSearchParams();
       formData.append('username', credentials.username);
       formData.append('password', credentials.password);
-
-      console.log('Sending login request...');
 
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -29,25 +27,18 @@ function App() {
         body: formData.toString(),
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const error = await response.json();
-        console.error('Login failed:', error);
         alert(error.detail || 'Credenciales incorrectas');
         return false;
       }
 
       const data = await response.json();
-      console.log('Login successful!');
       const token = data.access_token;
 
       localStorage.setItem('token', token);
 
-      // Decode token to get user info directly
       const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-
-      // Obtener información del usuario de la respuesta o del token
       const carrera = data.user?.carrera || tokenPayload.carrera || null;
 
       setIsAuthenticated(true);
@@ -58,13 +49,9 @@ function App() {
         carrera: carrera
       });
 
-      console.log('Current user set:', { username: tokenPayload.sub, role: tokenPayload.role, carrera: carrera });
-
-      console.log('Login complete!');
       return true;
     } catch (error) {
-      console.error('=== LOGIN ERROR ===');
-      console.error('Error:', error);
+      console.error('Error al iniciar sesión:', error);
       alert('Error al iniciar sesión. Verifique sus credenciales.');
       return false;
     }

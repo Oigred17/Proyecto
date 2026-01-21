@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import time, date
-from ..gestion_academica.esquemas import Materia, Aula, Grupo
+from ..gestion_academica.esquemas import Materia, Aula, Grupo, Profesor
 
 class TipoExamen(BaseModel):
     id: int
@@ -22,7 +22,7 @@ class ExamenCreate(BaseModel):
     hora_fin: time
     tipo_examen_id: int
     materia_id: int
-    aula_id: int
+    aula_id: Optional[int] = None
     grupo_id: int
     observaciones: Optional[str] = None
 
@@ -35,13 +35,16 @@ class ExamenUpdate(BaseModel):
 class Examen(ExamenBase):
     id: int
     materia_id: int
-    aula_id: int
+    aula_id: Optional[int] = None
     grupo_id: int
     sinodal_id: Optional[int] = None
     
     materia: Materia
-    aula: Aula
+    aula: Optional[Aula] = None
     grupo: Optional[Grupo] = None
+    sinodal: Optional[Profesor] = None
+    tiene_conflictos: Optional[bool] = False
+    detalles_conflicto: Optional[str] = None
     
     status: Optional[str] = None
     comentarios_rechazo: Optional[str] = None

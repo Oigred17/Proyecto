@@ -69,6 +69,18 @@ def inicializar_base_datos():
                 except Exception as e:
                     print(f"[INIT DB] ERROR al agregar carrera a notificaciones: {e}")
                     db.rollback()
+
+        # Verificar tabla materias y columnas nuevas
+        if 'materias' in tables:
+            materia_columns = [col['name'] for col in inspector.get_columns('materias')]
+            if 'academia_id' not in materia_columns:
+                print("[INIT DB] Agregando columna academia_id a materias...")
+                try:
+                    db.execute(text("ALTER TABLE materias ADD COLUMN academia_id INTEGER"))
+                    db.commit()
+                except Exception as e:
+                    print(f"[INIT DB] ERROR al agregar academia_id a materias: {e}")
+                    db.rollback()
                     
     except Exception as e:
         print(f"[INIT DB] ERROR general: {e}")

@@ -1,3 +1,7 @@
+/**
+ * Componente Dashboard - Panel principal de la aplicación.
+ * Gestiona la visualización de horarios, exámenes y navegación entre vistas.
+ */
 import React, { useState, useEffect } from 'react';
 import Header from './layout/Header';
 import Sidebar from './layout/Sidebar';
@@ -6,11 +10,11 @@ import ExamScheduleDisplay from './ExamScheduleDisplay';
 import UserManagement from './UserManagement';
 import SinodalesView from './SinodalesView';
 import GenerateExamsModal from './GenerateExamsModal';
+import ExamFiles from './ExamFiles';
 import './Dashboard.css';
 
-// Helper function to get day of the week from YYYY-MM-DD string
 const getDayOfWeek = (dateString) => {
-  const date = new Date(dateString + 'T00:00:00'); // Adding T00:00:00 to avoid timezone issues
+  const date = new Date(dateString + 'T00:00:00');
   const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
   return days[date.getDay()];
 };
@@ -23,35 +27,32 @@ function Dashboard({ currentUser, onLogout }) {
   const [selectedCarreraId, setSelectedCarreraId] = useState(null);
   const [selectedGrupoName, setSelectedGrupoName] = useState('');
   const [selectedGrupoId, setSelectedGrupoId] = useState(null);
-  const [activeView, setActiveView] = useState('Inicio'); // New state for sidebar view
+  const [activeView, setActiveView] = useState('Inicio');
   const [selectedGrupoIdForExamenes, setSelectedGrupoIdForExamenes] = useState(null);
-  const [showNotification, setShowNotification] = useState(false); // State for notification visibility
-  const [notificationMessage, setNotificationMessage] = useState(''); // State for notification message
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [showGenerateModal, setShowGenerateModal] = useState(false); // State for generate exams modal
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // Construir la URL base dinámicamente usando el hostname actual
   const API_URL = `http://${window.location.hostname}:8000/api`;
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchNotifs, 30000); // Poll notifications every 30s
+    const interval = setInterval(fetchNotifs, 30000);
     return () => clearInterval(interval);
   }, [currentUser]);
 
   const fetchData = () => {
-    // Fetch initial data
-    console.log('Fetching carreras...');
     fetch(`${API_URL}/carreras`)
       .then(response => response.json())
       .then(data => {
         if (!Array.isArray(data)) {
-          console.error("Carreras fetch did not return an array:", data);
+          console.error("Error: Carreras no es un array", data);
           return;
         }
         let filteredCarreras = data;
@@ -65,7 +66,6 @@ function Dashboard({ currentUser, onLogout }) {
         }
         setCarreras(filteredCarreras);
 
-        // Safety check for mapping
         const allHorarios = filteredCarreras.flatMap(carrera => {
           if (!carrera || !carrera.grupos || !Array.isArray(carrera.grupos)) return [];
           return carrera.grupos.flatMap(grupo => {
@@ -89,7 +89,6 @@ function Dashboard({ currentUser, onLogout }) {
 
   const fetchNotifs = () => {
     if (!currentUser) return;
-    // Assuming backend has GET /api/notificaciones/?rol=...
     const rol = currentUser.role;
     let url = `${API_URL}/notificaciones/?rol=${rol}`;
     if (currentUser.carrera) {
@@ -116,7 +115,6 @@ function Dashboard({ currentUser, onLogout }) {
 
 
   const fetchExamenes = () => {
-    console.log('Fetching examenes...');
     fetch(`${API_URL}/examenes`)
       .then(response => {
         if (!response.ok) {
@@ -125,7 +123,6 @@ function Dashboard({ currentUser, onLogout }) {
         return response.json();
       })
       .then(data => {
-        console.log('Examenes fetched:', data);
         let filteredData = data;
         if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           filteredData = data.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
@@ -136,7 +133,6 @@ function Dashboard({ currentUser, onLogout }) {
   };
 
   const handleGenerateExams = () => {
-    // ... same as before
     let carreraIdToUse = selectedCarreraId;
     if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
       const carrera = carreras.find(c => c.nombre === currentUser.carrera);
@@ -167,7 +163,11 @@ function Dashboard({ currentUser, onLogout }) {
       const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${carreraIdToUse}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(selectionData)
+        body: JSON.stringify({
+          seleccion: selectionData.selection,
+          tipoExamen: selectionData.tipoExamen,
+          periodo: selectionData.periodo
+        })
       });
 
       if (!response.ok) throw new Error('Error al generar exámenes');
@@ -187,10 +187,8 @@ function Dashboard({ currentUser, onLogout }) {
     if (!selectedCarreraId) {
       alert("Selecciona una carrera."); return;
     }
-    // If no group selected, we assume ALL groups (backend handles this with 0 or None)
     const grupoIdToSend = selectedGrupoIdForExamenes || 0;
 
-    // Confirmación al usuario
     if (grupoIdToSend === 0) {
       if (!window.confirm("¿Estás seguro de enviar a revisión los exámenes de TODOS los grupos pendientes de esta carrera?")) {
         return;
@@ -205,7 +203,7 @@ function Dashboard({ currentUser, onLogout }) {
       if (res.ok) {
         setNotificationMessage(data.message);
         setShowNotification(true);
-        fetchExamenes(); // Update status
+        fetchExamenes();
         setTimeout(() => setShowNotification(false), 3000);
       } else {
         alert(data.message);
@@ -220,7 +218,6 @@ function Dashboard({ currentUser, onLogout }) {
       alert("Selecciona una carrera."); return;
     }
 
-    // Si no hay grupo seleccionado, asumimos General (0)
     const grupoIdToSend = selectedGrupoIdForExamenes || 0;
 
     let motivo = "";
@@ -232,7 +229,6 @@ function Dashboard({ currentUser, onLogout }) {
       comentarios = prompt("Observaciones adicionales (opcional):");
     }
 
-    // Confirmación extra si es masivo
     if (grupoIdToSend === 0) {
       const actionName = accion === 'aprobar' ? "APROBAR" : "RECHAZAR";
       if (!window.confirm(`¿Estás seguro de ${actionName} los exámenes de TODOS los grupos pendientes de esta carrera?`)) {
@@ -281,7 +277,6 @@ function Dashboard({ currentUser, onLogout }) {
   const weekDays = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
 
   const filteredHorarios = horarios.filter(h => {
-    // ... same filters
     if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
       if (h.carrera_name !== currentUser.carrera) return false;
     }
@@ -301,17 +296,15 @@ function Dashboard({ currentUser, onLogout }) {
       if (selectedGrupoIdForExamenes) {
         matchesGroup = e.grupo_id === selectedGrupoIdForExamenes;
       } else {
-        matchesGroup = true; // Show all if none selected
+        matchesGroup = true;
       }
     } else if (activeView === 'Rechazados') {
-      // Show only rejected
       return matchesCareer && e.status === 'rechazado';
     }
     return matchesCareer && matchesGroup;
   });
 
   const getEventForCell = (day, time) => {
-    // ... same
     const formatTime = (t) => t.slice(0, 5);
     const formattedTime = formatTime(time);
     const exams = filteredExamenes.filter(e => {
@@ -414,8 +407,16 @@ function Dashboard({ currentUser, onLogout }) {
                 )}
                 <button
                   className="plan-button"
-                  onClick={handleGenerateExams}
+                  onClick={() => {
+                    const isPending = filteredExamenes.some(e => e.status === 'pendiente_aprobacion');
+                    if (isPending) {
+                      alert("⚠️ Ya tienes exámenes enviados a revisión. Debes esperar a que Servicios Escolares los apruebe o rechace antes de generar nuevos.");
+                      return;
+                    }
+                    handleGenerateExams();
+                  }}
                   disabled={!selectedCarreraId && !(currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera)}
+                  style={filteredExamenes.some(e => e.status === 'pendiente_aprobacion') ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                 >
                   Planificar
                 </button>
@@ -448,10 +449,6 @@ function Dashboard({ currentUser, onLogout }) {
             {activeView === 'Horarios' && (
               <ExamScheduleDisplay
                 examenes={filteredExamenes.filter(e => e.status !== 'rechazado' && e.status !== 'aprobado')}
-                // Only show workable exams here. Rejected go to Rejected tab if specific. 
-                // Wait, user might want to see approved ones? Yes. So filter appropriately.
-                // Let's modify filterExamenes logic or just show all non-rejected here?
-                // Actually approved is fine. Rejected should be in "Rechazados" if separate view.
                 onRefresh={fetchExamenes}
                 title={selectedCarreraName ? selectedCarreraName.toUpperCase() : "HORARIOS DE EXÁMENES"}
               >
@@ -484,8 +481,23 @@ function Dashboard({ currentUser, onLogout }) {
                       ))}
                   </select>
                   {currentUser && currentUser.role === 'jefe_carrera' && (
-                    <button className="plan-button" onClick={handleEnviarRevision} style={{ marginLeft: '20px' }}>
-                      Guardar y Enviar
+                    <button
+                      className="plan-button"
+                      onClick={() => {
+                        const isPending = filteredExamenes.some(e => e.status === 'pendiente_aprobacion');
+                        if (isPending) {
+                          alert("⚠️ Estos exámenes ya fueron enviados a revisión.");
+                          return;
+                        }
+                        handleEnviarRevision();
+                      }}
+                      style={{
+                        marginLeft: '20px',
+                        ...(filteredExamenes.some(e => e.status === 'pendiente_aprobacion') ? { opacity: 0.6, cursor: 'not-allowed', backgroundColor: '#94a3b8' } : {})
+                      }}
+                      disabled={filteredExamenes.length === 0}
+                    >
+                      {filteredExamenes.some(e => e.status === 'pendiente_aprobacion') ? 'En Revisión...' : 'Guardar y Enviar'}
                     </button>
                   )}
                   {currentUser && currentUser.role === 'servicios_escolares' && selectedGrupoIdForExamenes && (
@@ -538,6 +550,7 @@ function Dashboard({ currentUser, onLogout }) {
 
             {activeView === 'Usuarios' && <UserManagement />}
             {activeView === 'Sinodal' && <SinodalesView currentUser={currentUser} />}
+            {activeView === 'Archivos' && <ExamFiles currentUser={currentUser} API_URL={API_URL} />}
 
             {activeView === 'Inicio' && (
               <div className="welcome-container">
@@ -603,6 +616,15 @@ function Dashboard({ currentUser, onLogout }) {
                       <p>Asigna sinodales a los exámenes de tu carrera.</p>
                     </div>
                   )}
+                  <div className="access-card" onClick={() => setActiveView('Archivos')}>
+                    <div className="access-icon">
+                      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </div>
+                    <h3>Archivos</h3>
+                    <p>Imprime los calendarios de exámenes aprobados.</p>
+                  </div>
                 </div>
               </div>
             )}

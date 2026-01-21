@@ -5,6 +5,7 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, children }) => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [aulas, setAulas] = useState([]);
+  const [filterText, setFilterText] = useState('');
 
   // URL API base
   const API_URL = `http://${window.location.hostname}:8000/api`;
@@ -15,6 +16,15 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, children }) => {
       .then(data => setAulas(data))
       .catch(err => console.error("Error cargando aulas:", err));
   }, []);
+
+  // Filtrar exámenes antes de agrupar
+  const filteredExamenes = (examenes || []).filter(ex => {
+    const search = filterText.toLowerCase();
+    const matchesAula = ex.aula?.nombre?.toLowerCase().includes(search);
+    const matchesMateria = ex.materia?.nombre?.toLowerCase().includes(search);
+    const matchesProfesor = ex.materia?.profesor?.nombre?.toLowerCase().includes(search);
+    return matchesAula || matchesMateria || matchesProfesor;
+  });
 
   if (!examenes || examenes.length === 0) {
     return (
@@ -38,8 +48,8 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, children }) => {
     );
   }
 
-  // Agrupar exámenes por Grupo
-  const groupedExams = examenes.reduce((acc, exam) => {
+  // Agrupar exámenes filtrados por Grupo
+  const groupedExams = filteredExamenes.reduce((acc, exam) => {
     const grupoName = exam.grupo ? exam.grupo.nombre_grupo : 'Sin Grupo';
     if (!acc[grupoName]) {
       acc[grupoName] = [];
@@ -98,7 +108,29 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, children }) => {
         <div className="table-header-title" style={{ borderBottom: 'none', marginBottom: 0 }}>
           {title || "HORARIOS DE EXÁMENES"}
         </div>
-        <div className="filters-container">
+        <div className="filters-container" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="search-input-wrapper" style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Buscar Aula, Materia..."
+              value={filterText}
+              onChange={e => setFilterText(e.target.value)}
+              style={{
+                padding: '8px 12px 8px 35px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontSize: '14px',
+                width: '250px'
+              }}
+            />
+            <svg
+              viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" strokeWidth="2"
+              style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
           {children}
         </div>
       </div>
@@ -211,6 +243,17 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, children }) => {
                       </td>
                       <td className="td-aula">
                         {exam.aula ? exam.aula.nombre : 'N/A'}
+                        {exam.tiene_conflictos && (
+                          <div className="conflict-badge" title={exam.detalles_conflicto} style={{
+                            display: 'inline-block', marginLeft: '8px', color: '#ef4444', cursor: 'help'
+                          }}>
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                              <line x1="12" y1="9" x2="12" y2="13"></line>
+                              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                          </div>
+                        )}
                       </td>
                       {examenes.some(e => e.comentarios_rechazo) && (
                         <td className="td-rechazo" style={{ color: '#e53e3e', fontWeight: '500' }}>

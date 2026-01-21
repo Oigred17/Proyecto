@@ -12,6 +12,11 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
   const [academias, setAcademias] = useState([]);
   const [groupsData, setGroupsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterText, setFilterText] = useState('');
+  const [tipoExamen, setTipoExamen] = useState('Parcial 1');
+  const [periodo, setPeriodo] = useState('2025-2'); // Optional: could be dynamic
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genMessage, setGenMessage] = useState('Calculando horarios y evitando conflictos...');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -52,7 +57,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
               hasSinodal: !!existing?.sinodal_id,
               sinodalNombre: existing?.sinodal?.nombre || null,
               selected: true,
-              academiaId: ''
+              academiaId: h.materia.academia_id || ''
             };
           }
         });
@@ -110,6 +115,14 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
     }));
   };
 
+  const toggleSelectAll = (checked) => {
+    setGroupsData(prev => prev.map(g => ({
+      ...g,
+      selected: checked,
+      materias: g.materias.map(m => ({ ...m, selected: checked }))
+    })));
+  };
+
   const setAcademiaValue = (groupId, materiaId, value) => {
     setGroupsData(prev => prev.map(g => {
       if (g.id === groupId) {
@@ -143,8 +156,29 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
       return;
     }
 
-    onGenerate(selection);
+    setIsGenerating(true);
+    setGenMessage('Analizando disponibilidad de aulas y docentes...');
+
+    // We wrap the onGenerate call to handle local loading state
+    const runGeneration = async () => {
+      try {
+        await onGenerate({
+          selection,
+          tipoExamen,
+          periodo
+        });
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    runGeneration();
   };
+
+  const filteredGroups = groupsData.filter(g =>
+    g.nombre.toLowerCase().includes(filterText.toLowerCase()) ||
+    g.materias.some(m => m.nombre.toLowerCase().includes(filterText.toLowerCase()))
+  );
 
   if (loading) {
     return (
@@ -182,10 +216,64 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
             <p><strong>Regla de Negocio:</strong> Se asignará automáticamente un solo examen por día para cada grupo para evitar sobrecarga de los estudiantes.</p>
           </div>
 
+          <div className="gem-top-controls" style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div className="control-field">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>TIPO DE EXAMEN</label>
+              <select
+                className="gem-select-main"
+                value={tipoExamen}
+                onChange={e => setTipoExamen(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', minWidth: '180px' }}
+              >
+                <option value="Parcial 1">Parcial 1</option>
+                <option value="Parcial 2">Parcial 2</option>
+                <option value="Parcial 3">Parcial 3</option>
+                <option value="Ordinario">Ordinario</option>
+                <option value="Extraordinario 1">Extraordinario 1</option>
+                <option value="Extraordinario 2">Extraordinario 2</option>
+              </select>
+            </div>
+
+            <div className="control-field">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>PERIODO</label>
+              <input
+                type="text"
+                className="gem-input-main"
+                value={periodo}
+                onChange={e => setPeriodo(e.target.value)}
+                placeholder="Ej. 2025-2"
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+              />
+            </div>
+
+            <div className="control-field" style={{ flex: 1, minWidth: '200px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>FILTRAR GRUPO O MATERIA</label>
+              <input
+                type="text"
+                className="gem-input-main"
+                value={filterText}
+                onChange={e => setFilterText(e.target.value)}
+                placeholder="Buscar..."
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%' }}
+              />
+            </div>
+
+            <div className="control-field">
+              <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <input
+                  type="checkbox"
+                  checked={groupsData.length > 0 && groupsData.every(g => g.selected)}
+                  onChange={e => toggleSelectAll(e.target.checked)}
+                />
+                <span style={{ fontSize: '13px', fontWeight: '600' }}>Seleccionar Todo</span>
+              </label>
+            </div>
+          </div>
+
           <div className="groups-container">
-            {groupsData.length === 0 ? (
-              <div className="empty-state">No se encontraron materias programadas para los grupos de esta carrera.</div>
-            ) : groupsData.map(group => (
+            {filteredGroups.length === 0 ? (
+              <div className="empty-state">No se encontraron materias que coincidan con la búsqueda.</div>
+            ) : filteredGroups.map(group => (
               <div key={group.id} className={`group-section ${group.selected ? 'active' : ''}`}>
                 <div className="group-header" onClick={() => toggleGroup(group.id)}>
                   <div className="group-info">
@@ -266,15 +354,23 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
         </div>
 
         <div className="gem-actions">
-          <button className="gem-cancel" onClick={onClose}>Cancelar</button>
-          <button className="gem-generate btn-primary" onClick={handleGenerateClick}>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M5 5l14 14M19 5L5 14"></path>
-              {/* Note: Dummy icon for generate, replace if needed */}
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            Generar Exámenes
-          </button>
+          {isGenerating ? (
+            <div className="gem-generating-status">
+              <div className="progress-line"></div>
+              <span>{genMessage}</span>
+            </div>
+          ) : (
+            <>
+              <button className="gem-cancel" onClick={onClose}>Cancelar</button>
+              <button className="gem-generate btn-primary" onClick={handleGenerateClick}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M5 5l14 14M19 5L5 14"></path>
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Generar Exámenes
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

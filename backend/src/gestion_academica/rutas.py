@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload, joinedload
 from typing import List
 
 from ..configuracion.base_datos import obtener_db
@@ -22,13 +22,27 @@ def get_carreras(db: Session = Depends(obtener_db)):
     # modelos.Grupo.horarios -> relaciona con 'Horario'
     
     carreras = db.query(modelos.Carrera).options(
-        joinedload(modelos.Carrera.grupos).joinedload(modelos.Grupo.horarios).joinedload(modelos_horarios.Horario.materia).joinedload(modelos.Materia.profesor),
-        joinedload(modelos.Carrera.grupos).joinedload(modelos.Grupo.horarios).joinedload(modelos_horarios.Horario.aula)
+        selectinload(modelos.Carrera.grupos)
+            .selectinload(modelos.Grupo.horarios)
+            .selectinload(modelos_horarios.Horario.materia)
+            .selectinload(modelos.Materia.profesor),
+        selectinload(modelos.Carrera.grupos)
+            .selectinload(modelos.Grupo.horarios)
+            .selectinload(modelos_horarios.Horario.materia)
+            .selectinload(modelos.Materia.academia),
+        selectinload(modelos.Carrera.grupos)
+            .selectinload(modelos.Grupo.horarios)
+            .selectinload(modelos_horarios.Horario.aula)
     ).all()
 
-    # Pre-popular nombre de carrera en materia si es necesario (lógica original)
+    # Pre-popular nombre de carrera en materia y filtrar materias no examen (Inglés/Sin Profesor)
     for carrera in carreras:
         for grupo in carrera.grupos:
+            # Filtrar horarios cuya materia no tenga profesor (Ej: Inglés)
+            grupo.horarios = [
+                h for h in grupo.horarios 
+                if h.materia and h.materia.profesor_id is not None
+            ]
             for horario in grupo.horarios:
                 if horario.materia:
                     horario.materia.carrera_nombre = carrera.nombre
@@ -50,10 +64,18 @@ def get_academias(db: Session = Depends(obtener_db)):
 def get_materias(carrera_id: int = None, db: Session = Depends(obtener_db)):
     query = db.query(modelos.Materia).options(
         joinedload(modelos.Materia.profesor),
-        joinedload(modelos.Materia.carrera)
+        joinedload(modelos.Materia.carrera),
+        joinedload(modelos.Materia.academia)
     )
     if carrera_id:
         query = query.filter(modelos.Materia.carrera_id == carrera_id)
+    
+    # Filtrar materias sin profesor o específicamente Inglés
+    # Usamos ilike para ser case-insensitive por si acaso
+    query = query.filter(modelos.Materia.profesor_id.isnot(None))
+    query = query.filter(~modelos.Materia.nombre.ilike('%inglés%'))
+    query = query.filter(~modelos.Materia.nombre.ilike('%ingles%'))
+
     materias = query.all()
     
     for materia in materias:

@@ -31,6 +31,8 @@ class Materia(BaseModel):
     profesor: Optional[Profesor] = None
     carrera_id: int
     carrera_nombre: Optional[str] = None
+    academia_id: Optional[int] = None
+    academia: Optional[Academia] = None
     class Config:
         from_attributes = True
 

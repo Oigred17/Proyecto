@@ -1,0 +1,142 @@
+[
+  {
+    "clave": "01B",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ADMINISTRACIÓN MUNICIPAL 2015",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "11",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "DOCTORADO EN GOBIERNO ELECTRÓNICO 2016",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "10",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "MAESTRÍA EN GOBIERNO ELECTRÓNICO 2016",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "09",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "MAESTRÍA EN SALUD PÚBLICA 2016",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "08",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "MAESTRÍA EN PLANEACIÓN ESTRATÉGICA MUNICIPAL 2016",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "07B",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN NUTRICIÓN 2017",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "06",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN INFORMÁTICA",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "05",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ADMINISTRACIÓN PÚBLICA 2012",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "12",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "INGLÉS",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "03C",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ENFERMERÍA 2018",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "14",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ODONTOLOGÍA 2017",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "15",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN MEDICINA 2018",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "15POS",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "MAESTRÍA EN ADMINISTRACIÓN UNIVERSITARIA  2022",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "04B",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN CIENCIAS EMPRESARIALES 2017",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "06B",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN INFORMÁTICA 2022",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "16A",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN CIENCIAS BIOMÉDICAS 2024",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "03D",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ENFERMERÍA 2024",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "08C",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "MAESTRÍA EN PLANEACIÓN ESTRATÉGICA MUNICIPAL 2024",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "05C",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN ADMINISTRACIÓN PÚBLICA 2024",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  },
+  {
+    "clave": "07C",
+    "updated_at": "2026-01-10T14:33:00.637169",
+    "nombre": "LICENCIATURA EN NUTRICIÓN 2025",
+    "vigente": true,
+    "created_at": "2026-01-10T14:33:00.637169"
+  }
+]

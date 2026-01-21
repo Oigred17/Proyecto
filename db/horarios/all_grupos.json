@@ -1,0 +1,1112 @@
+[
+  {
+    "periodo": "2526A",
+    "clave": "104-A",
+    "carrera": "04B",
+    "alumnos": 21,
+    "nombre": "104-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "106-A",
+    "carrera": "06B",
+    "alumnos": 20,
+    "nombre": "106-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "106-B",
+    "carrera": "06B",
+    "alumnos": 20,
+    "nombre": "106-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "506",
+    "carrera": "06B",
+    "alumnos": 17,
+    "nombre": "506",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "706",
+    "carrera": "06B",
+    "alumnos": 20,
+    "nombre": "706",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "906",
+    "carrera": "06",
+    "alumnos": 9,
+    "nombre": "906",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "104-B",
+    "carrera": "04B",
+    "alumnos": 22,
+    "nombre": "104-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "304",
+    "carrera": "04B",
+    "alumnos": 22,
+    "nombre": "304",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "504",
+    "carrera": "04B",
+    "alumnos": 22,
+    "nombre": "504",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "704",
+    "carrera": "04B",
+    "alumnos": 18,
+    "nombre": "704",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "904",
+    "carrera": "04B",
+    "alumnos": 11,
+    "nombre": "904",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "505",
+    "carrera": "05",
+    "alumnos": 13,
+    "nombre": "505",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "705",
+    "carrera": "05",
+    "alumnos": 15,
+    "nombre": "705",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "905",
+    "carrera": "05",
+    "alumnos": 7,
+    "nombre": "905",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "105",
+    "carrera": "05C",
+    "alumnos": 18,
+    "nombre": "105",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "305",
+    "carrera": "05C",
+    "alumnos": 8,
+    "nombre": "305",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "108",
+    "carrera": "08C",
+    "alumnos": 5,
+    "nombre": "108",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "109",
+    "carrera": "09",
+    "alumnos": 5,
+    "nombre": "109",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "309",
+    "carrera": "09",
+    "alumnos": 5,
+    "nombre": "309",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "310",
+    "carrera": "10",
+    "alumnos": 5,
+    "nombre": "310",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "111",
+    "carrera": "11",
+    "alumnos": 5,
+    "nombre": "111",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "511",
+    "carrera": "11",
+    "alumnos": 10,
+    "nombre": "511",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "307",
+    "carrera": "07B",
+    "alumnos": 34,
+    "nombre": "307",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "507",
+    "carrera": "07B",
+    "alumnos": 43,
+    "nombre": "507",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "707",
+    "carrera": "07B",
+    "alumnos": 37,
+    "nombre": "707",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "907",
+    "carrera": "07B",
+    "alumnos": 34,
+    "nombre": "907",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "501",
+    "carrera": "01B",
+    "alumnos": 3,
+    "nombre": "501",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "701",
+    "carrera": "01B",
+    "alumnos": 5,
+    "nombre": "701",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "901",
+    "carrera": "01B",
+    "alumnos": 3,
+    "nombre": "901",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "308-B",
+    "carrera": "08C",
+    "alumnos": 5,
+    "nombre": "308-B",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "308",
+    "carrera": "08C",
+    "alumnos": 5,
+    "nombre": "308-A",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "107-A",
+    "carrera": "07C",
+    "alumnos": 20,
+    "nombre": "107-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "107-B",
+    "carrera": "07C",
+    "alumnos": 20,
+    "nombre": "107-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "116-A",
+    "carrera": "16A",
+    "alumnos": 20,
+    "nombre": "116-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "116-B",
+    "carrera": "16A",
+    "alumnos": 20,
+    "nombre": "116-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "316",
+    "carrera": "16A",
+    "alumnos": 41,
+    "nombre": "316",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "306-B",
+    "carrera": "06B",
+    "alumnos": 29,
+    "nombre": "306-B",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "306",
+    "carrera": "06B",
+    "alumnos": 29,
+    "nombre": "306-A",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-A",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-B",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-C",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-C",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-D",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-D",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-E",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-E",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-F",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-F",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-G",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-G",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-H",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-H",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-I",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-I",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "113-J",
+    "carrera": "14",
+    "alumnos": 35,
+    "nombre": "113-J",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "313-A",
+    "carrera": "14",
+    "alumnos": 40,
+    "nombre": "313-A",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "313-B",
+    "carrera": "14",
+    "alumnos": 39,
+    "nombre": "313-B",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "313-C",
+    "carrera": "14",
+    "alumnos": 39,
+    "nombre": "313-C",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "313-D",
+    "carrera": "14",
+    "alumnos": 39,
+    "nombre": "313-D",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "513-A",
+    "carrera": "14",
+    "alumnos": 31,
+    "nombre": "513-A",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "513-B",
+    "carrera": "14",
+    "alumnos": 31,
+    "nombre": "513-B",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "513-C",
+    "carrera": "14",
+    "alumnos": 31,
+    "nombre": "513-C",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "513-D",
+    "carrera": "14",
+    "alumnos": 31,
+    "nombre": "513-D",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "713-A",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "713-A",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "713-B",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "713-B",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "713-C",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "713-C",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "913 A",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "913 A",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "913 B",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "913 B",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "913 C",
+    "carrera": "14",
+    "alumnos": 32,
+    "nombre": "913 C",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-A",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-B",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-C",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-C",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-D",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-D",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-E",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-E",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-F",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-F",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-G",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-G",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-H",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-H",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "103-I",
+    "carrera": "03D",
+    "alumnos": 35,
+    "nombre": "103-I",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-A",
+    "carrera": "03D",
+    "alumnos": 31,
+    "nombre": "303-A",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-B",
+    "carrera": "03D",
+    "alumnos": 31,
+    "nombre": "303-B",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-C",
+    "carrera": "03D",
+    "alumnos": 30,
+    "nombre": "303-C",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-D",
+    "carrera": "03D",
+    "alumnos": 30,
+    "nombre": "303-D",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-E",
+    "carrera": "03D",
+    "alumnos": 30,
+    "nombre": "303-E",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-F",
+    "carrera": "03D",
+    "alumnos": 30,
+    "nombre": "303-F",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "303-G",
+    "carrera": "03D",
+    "alumnos": 30,
+    "nombre": "303-G",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "503-A",
+    "carrera": "03C",
+    "alumnos": 34,
+    "nombre": "503-A",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "503-B",
+    "carrera": "03C",
+    "alumnos": 34,
+    "nombre": "503-B",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "503-C",
+    "carrera": "03C",
+    "alumnos": 34,
+    "nombre": "503-C",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "503-D",
+    "carrera": "03C",
+    "alumnos": 34,
+    "nombre": "503-D",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "703-A",
+    "carrera": "03C",
+    "alumnos": 35,
+    "nombre": "703-A",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "703-B",
+    "carrera": "03C",
+    "alumnos": 35,
+    "nombre": "703-B",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "703-C",
+    "carrera": "03C",
+    "alumnos": 35,
+    "nombre": "703-C",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "903-A",
+    "carrera": "03C",
+    "alumnos": 36,
+    "nombre": "903-A",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "903-B",
+    "carrera": "03C",
+    "alumnos": 36,
+    "nombre": "903-B",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "903-C",
+    "carrera": "03C",
+    "alumnos": 36,
+    "nombre": "903-C",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "114-A",
+    "carrera": "15",
+    "alumnos": 35,
+    "nombre": "114-A",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "114-B",
+    "carrera": "15",
+    "alumnos": 36,
+    "nombre": "114-B",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "114-C",
+    "carrera": "15",
+    "alumnos": 37,
+    "nombre": "114-C",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "114-D",
+    "carrera": "15",
+    "alumnos": 38,
+    "nombre": "114-D",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "314-A",
+    "carrera": "15",
+    "alumnos": 42,
+    "nombre": "314-A",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "314-B",
+    "carrera": "15",
+    "alumnos": 42,
+    "nombre": "314-B",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "314-C",
+    "carrera": "15",
+    "alumnos": 42,
+    "nombre": "314-C",
+    "semestre": 3,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "514-A",
+    "carrera": "15",
+    "alumnos": 38,
+    "nombre": "514-A",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "514-B",
+    "carrera": "15",
+    "alumnos": 38,
+    "nombre": "514-B",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "514-C",
+    "carrera": "15",
+    "alumnos": 38,
+    "nombre": "514-C",
+    "semestre": 5,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "714-A",
+    "carrera": "15",
+    "alumnos": 37,
+    "nombre": "714-A",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "714-B",
+    "carrera": "15",
+    "alumnos": 37,
+    "nombre": "714-B",
+    "semestre": 7,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "914-A",
+    "carrera": "15",
+    "alumnos": 38,
+    "nombre": "914-A",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "914-B",
+    "carrera": "15",
+    "alumnos": 37,
+    "nombre": "914-B",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "914-C",
+    "carrera": "15",
+    "alumnos": 37,
+    "nombre": "914-C",
+    "semestre": 9,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "1114-A",
+    "carrera": "15",
+    "alumnos": 46,
+    "nombre": "1114-A",
+    "semestre": 11,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "1114-B",
+    "carrera": "15",
+    "alumnos": 45,
+    "nombre": "1114-B",
+    "semestre": 11,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "1114-C",
+    "carrera": "15",
+    "alumnos": 45,
+    "nombre": "1114-C",
+    "semestre": 11,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "112",
+    "carrera": "12",
+    "alumnos": 12,
+    "nombre": "112",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "312",
+    "carrera": "12",
+    "alumnos": 20,
+    "nombre": "312",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "112C",
+    "carrera": "12",
+    "alumnos": 18,
+    "nombre": "112C",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "112D",
+    "carrera": "12",
+    "alumnos": 45,
+    "nombre": "112",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  },
+  {
+    "periodo": "2526A",
+    "clave": "112E",
+    "carrera": "12",
+    "alumnos": 40,
+    "nombre": "112E",
+    "semestre": 1,
+    "created_at": "2026-01-10T14:33:35.736810",
+    "updated_at": "2026-01-10T14:33:35.736810"
+  }
+]

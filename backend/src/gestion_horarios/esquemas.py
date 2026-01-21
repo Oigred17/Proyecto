@@ -2,10 +2,19 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import time
 
+class ProfesorRef(BaseModel):
+    id: int
+    nombre: str
+    class Config:
+        from_attributes = True
+
 class MateriaRef(BaseModel):
     id: int
     nombre: str
     carrera_nombre: Optional[str] = None
+    profesor_id: Optional[int] = None
+    profesor: Optional[ProfesorRef] = None
+    academia_id: Optional[int] = None
     class Config:
         from_attributes = True
 
