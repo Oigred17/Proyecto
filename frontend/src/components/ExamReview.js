@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './ExamScheduleDisplay.css'; // Reusing styles
+import './ExamScheduleDisplay.css';
 
 const ExamReview = ({ currentUser, API_URL, showToast }) => {
     const [exams, setExams] = useState([]);
     const [selectedCareer, setSelectedCareer] = useState(null);
     const [showRejectModal, setShowRejectModal] = useState(false);
-    const [rejectTarget, setRejectTarget] = useState(null); // {type: 'career'|'group', id: number}
+    const [rejectTarget, setRejectTarget] = useState(null);
     const [rejectReason, setRejectReason] = useState("");
     const [rejectComment, setRejectComment] = useState("");
 
@@ -25,7 +25,6 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
         try {
             const res = await fetch(`${API_URL}/examenes`);
             const data = await res.json();
-            // Filter only pending approval
             const pending = data.filter(e => e.status === 'pendiente_aprobacion');
             setExams(pending);
         } catch (e) {
@@ -33,7 +32,6 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
         }
     };
 
-    // Grouping logic
     const examsByCareer = exams.reduce((acc, exam) => {
         const careerName = exam.materia && exam.materia.carrera_nombre ? exam.materia.carrera_nombre : 'Desconocida';
         const careerId = exam.materia ? exam.materia.carrera_id : 0;
@@ -60,7 +58,7 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
 
         const payload = {
             carrera_id: type === 'career' ? id : selectedCareer.id,
-            grupo_id: type === 'group' ? id : 0, // 0 means all groups in that career
+            grupo_id: type === 'group' ? id : 0,
             accion: accion,
             motivo: rejectReason,
             comentarios: rejectComment
@@ -73,7 +71,6 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                // Refresh
                 await fetchExamenesPendientes();
                 setShowRejectModal(false);
                 setRejectReason("");
@@ -81,12 +78,10 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                 if (type === 'career') {
                     setSelectedCareer(null);
                 } else {
-                    // Update current view exams
                     const updatedExams = exams.filter(e => {
                         if (type === 'group') return e.grupo_id !== id;
                         return true;
                     });
-                    // If no more exams for this career, go back
                     const careerStillHasExams = updatedExams.some(e => e.materia.carrera_id === selectedCareer.id);
                     if (!careerStillHasExams) setSelectedCareer(null);
                 }
@@ -136,7 +131,7 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
         return (
             <div className="exam-schedule-container">
                 <header style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
-                    <button onClick={() => setSelectedCareer(null)} className="btn-edit" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <button onClick={() => setSelectedCareer(null)} className="btn-edit">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                         Volver
                     </button>
@@ -145,17 +140,19 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                     </h3>
                 </header>
 
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '12px', marginBottom: '30px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: '#f8fafc', padding: '24px', borderRadius: '16px', marginBottom: '32px', border: '1px solid #e2e8f0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <h4 style={{ margin: 0, color: '#475569' }}>Acciones Generales para la Carrera</h4>
-                            <p style={{ margin: '5px 0 0 0', fontSize: '13px', color: '#64748b' }}>Afecta a todos los grupos mostrados abajo</p>
+                            <h4 style={{ margin: 0, color: '#0f172a', fontSize: '1.1rem', fontWeight: 700 }}>Acciones Generales para la Carrera</h4>
+                            <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#64748b' }}>Afecta a todos los grupos mostrados abajo</p>
                         </div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button className="btn-save" onClick={() => handleAction('aprobar', 'career', selectedCareer.id)} style={{ padding: '10px 20px', fontSize: '14px', backgroundColor: '#3b82f6', color: 'white' }}>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button className="btn-save" onClick={() => handleAction('aprobar', 'career', selectedCareer.id)}>
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 Aprobar Toda la Carrera
                             </button>
-                            <button className="btn-cancel" onClick={() => handleAction('rechazar', 'career', selectedCareer.id)} style={{ padding: '10px 20px', fontSize: '14px' }}>
+                            <button className="btn-cancel" onClick={() => handleAction('rechazar', 'career', selectedCareer.id)}>
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 Rechazar Toda la Carrera
                             </button>
                         </div>
@@ -166,27 +163,31 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                     {sortedSemesters.map(semKey => (
                         <div key={semKey} className="semester-group">
                             <div style={{
-                                background: '#ffffff',
-                                color: '#1e293b',
-                                padding: '10px 20px',
-                                borderRadius: '10px',
-                                fontSize: '12px',
+                                background: 'transparent',
+                                color: '#334155',
+                                padding: '10px 0',
+                                fontSize: '13px',
                                 fontWeight: '800',
                                 letterSpacing: '0.1em',
-                                marginBottom: '20px',
-                                textTransform: 'uppercase'
+                                marginBottom: '16px',
+                                textTransform: 'uppercase',
+                                borderBottom: '2px solid #e2e8f0',
+                                display: 'inline-block'
                             }}>
                                 {semKey}
                             </div>
                             {Object.values(examsPerSemester[semKey]).sort((a, b) => a.name.localeCompare(b.name)).map(group => (
-                                <div key={group.id} style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-                                    <div style={{ backgroundColor: '#f1f5f9', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h4 style={{ margin: 0, color: '#1e293b' }}>Grupo: {group.name}</h4>
+                                <div key={group.id} style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', marginBottom: '24px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ backgroundColor: '#fcfcfc', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
+                                            <h4 style={{ margin: 0, color: '#1e293b', fontSize: '1rem', fontWeight: 700 }}>Grupo: {group.name}</h4>
+                                        </div>
                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button className="btn-save" onClick={() => handleAction('aprobar', 'group', group.id)} style={{ padding: '6px 15px', fontSize: '13px' }}>
+                                            <button className="btn-save" onClick={() => handleAction('aprobar', 'group', group.id)} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
                                                 Aprobar
                                             </button>
-                                            <button className="btn-cancel" onClick={() => handleAction('rechazar', 'group', group.id)} style={{ padding: '6px 15px', fontSize: '13px' }}>
+                                            <button className="btn-cancel" onClick={() => handleAction('rechazar', 'group', group.id)} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
                                                 Rechazar
                                             </button>
                                         </div>
@@ -203,14 +204,22 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {group.exams.map(ex => (
-                                                    <tr key={ex.id}>
+                                                {group.exams.map((ex, idx) => (
+                                                    <tr key={ex.id} className={idx % 2 === 0 ? 'row-even' : 'row-odd'}>
                                                         <td className="td-materia">{ex.materia.nombre}</td>
-                                                        <td className="td-profesor">{ex.materia.profesor ? ex.materia.profesor.nombre : 'S/A'}</td>
-                                                        <td className="td-fecha">{new Date(ex.fecha + 'T00:00:00').toLocaleDateString()}</td>
-                                                        <td className="td-hora">{ex.hora_inicio.slice(0, 5)} - {ex.hora_fin.slice(0, 5)}</td>
+                                                        <td className="td-profesor" style={{ color: '#475569' }}>{ex.materia.profesor ? ex.materia.profesor.nombre : 'S/A'}</td>
+                                                        <td className="td-fecha" style={{ fontWeight: 500 }}>{new Date(ex.fecha + 'T00:00:00').toLocaleDateString()}</td>
+                                                        <td className="td-hora">
+                                                            <span className="time-display-premium">
+                                                                {ex.hora_inicio.slice(0, 5)} - {ex.hora_fin.slice(0, 5)}
+                                                            </span>
+                                                        </td>
                                                         <td className="td-aula">
-                                                            {ex.aula ? ex.aula.nombre : 'N/A'}
+                                                            {ex.aula ? (
+                                                                <span className="aula-tag">{ex.aula.nombre}</span>
+                                                            ) : (
+                                                                <span className="aula-tag-none">N/A</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -224,38 +233,35 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                 </div>
 
                 {showRejectModal && (
-                    <div className="modal-overlay" style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
-                    }}>
-                        <div className="modal-content" style={{
-                            backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '500px',
-                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-                        }}>
-                            <h3 style={{ marginTop: 0, color: '#1e293b' }}>Confirmar Rechazo</h3>
-                            <p style={{ color: '#64748b', fontSize: '14px' }}>
-                                Está por rechazar los exámenes de {rejectTarget.type === 'career' ? 'toda la carrera' : 'este grupo'}.
+                    <div className="modal-overlay">
+                        <div className="modal-content" style={{ width: '500px', backgroundColor: 'white', padding: '32px', borderRadius: '24px' }}>
+                            <h3 style={{ marginTop: 0, color: '#1e293b', fontSize: '1.25rem', fontWeight: 800, marginBottom: '8px' }}>Confirmar Rechazo</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.5 }}>
+                                Está por rechazar los exámenes de <strong style={{ color: '#0f172a' }}>{rejectTarget.type === 'career' ? 'toda la carrera' : 'este grupo'}</strong>. Esta acción notificará a los coordinadores.
                             </p>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#64748b' }}>Motivo principal</label>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Motivo principal</label>
                                 <select className="edit-select" value={rejectReason} onChange={e => setRejectReason(e.target.value)}>
-                                    <option value="">Selecciona...</option>
+                                    <option value="">Selecciona una opción...</option>
                                     {reasons.map(r => <option key={r} value={r}>{r}</option>)}
                                 </select>
                             </div>
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#64748b' }}>Observaciones</label>
+                            <div style={{ marginBottom: '32px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Observaciones adicionales</label>
                                 <textarea
                                     className="edit-input"
                                     rows="4"
                                     value={rejectComment}
                                     onChange={e => setRejectComment(e.target.value)}
-                                    placeholder="Detalles adicionales sobre el rechazo..."
+                                    placeholder="Escriba aquí los detalles o correcciones necesarias..."
+                                    style={{ resize: 'none' }}
                                 />
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                 <button className="btn-edit" onClick={() => setShowRejectModal(false)}>Cancelar</button>
-                                <button className="btn-cancel" onClick={() => handleAction('rechazar', rejectTarget.type, rejectTarget.id)}>Confirmar y Rechazar</button>
+                                <button className="btn-save" style={{ backgroundColor: '#ef4444', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.3)' }} onClick={() => handleAction('rechazar', rejectTarget.type, rejectTarget.id)}>
+                                    Confirmar Rechazo
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -280,7 +286,7 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
             ) : (
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                     gap: '24px',
                     width: '100%'
                 }}>
@@ -289,24 +295,25 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                             padding: '24px',
                             backgroundColor: 'white',
                             border: '1px solid #e2e8f0',
-                            borderRadius: '20px',
+                            borderRadius: '24px',
                             cursor: 'pointer',
-                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)',
                             position: 'relative',
                             overflow: 'hidden',
                             display: 'flex',
                             flexDirection: 'column',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            height: '100%'
                         }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-8px)';
-                                e.currentTarget.style.boxShadow = '0 25px 30px -5px rgba(0, 0, 0, 0.1)';
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.08)';
                                 e.currentTarget.style.borderColor = '#3b82f6';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)';
                                 e.currentTarget.style.borderColor = '#e2e8f0';
                             }}
                         >
@@ -321,7 +328,7 @@ const ExamReview = ({ currentUser, API_URL, showToast }) => {
                                 </div>
                             </div>
 
-                            <h4 style={{ margin: '0 0 16px 0', color: '#1e293b', fontSize: '20px', fontWeight: '800', lineHeight: '1.4' }}>
+                            <h4 style={{ margin: '0 0 16px 0', color: '#1e293b', fontSize: '1.25rem', fontWeight: '800', lineHeight: '1.4' }}>
                                 {career.name}
                             </h4>
 

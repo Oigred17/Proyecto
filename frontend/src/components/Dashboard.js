@@ -619,11 +619,9 @@ function Dashboard({ currentUser, onLogout }) {
               <div className="welcome-container">
                 <div className="welcome-card">
                   <div className="welcome-icon">
-                    <svg viewBox="0 0 24 24" width="60" height="60" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"></path>
-                      <path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10"></path>
-                      <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
-                      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.82-2.82L7 15"></path>
+                    <svg viewBox="0 0 24 24" width="60" height="60" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                      <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
                     </svg>
                   </div>
                   <div className="welcome-text">

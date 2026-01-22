@@ -20,7 +20,7 @@ function UserManagement({ showToast, confirmCustom }) {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`${API_URL}/users`);
+            const response = await fetch(`${API_URL}/auth/users`);
             if (response.ok) {
                 const data = await response.json();
                 setUsers(data);
@@ -76,7 +76,7 @@ function UserManagement({ showToast, confirmCustom }) {
 
     const ejecutarBorradoUsuario = async (userId) => {
         try {
-            const response = await fetch(`${API_URL}/users/${userId}`, {
+            const response = await fetch(`${API_URL}/auth/users/${userId}`, {
                 method: 'DELETE',
             });
 
