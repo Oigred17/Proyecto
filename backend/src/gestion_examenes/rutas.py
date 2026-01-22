@@ -860,6 +860,8 @@ def enviar_revision(carrera_id: int, grupo_id: Optional[int] = None, db: Session
     if not grupos_ids:
         return {"message": "No hay exámenes pendientes de enviar (borradores o rechazados)."}
     
+    count_grupos = 0 # Inicializar contador
+
     # VALIDACIÓN: Verificar que NO haya conflictos en los exámenes que se quieren enviar
     examenes_con_error = db.query(modelos_examenes.Examen).join(modelos_academica.Materia).filter(
         modelos_examenes.Examen.grupo_id.in_(grupos_ids),
@@ -868,8 +870,6 @@ def enviar_revision(carrera_id: int, grupo_id: Optional[int] = None, db: Session
     ).all()
 
     # Usamos la lógica de get_examenes para detectar conflictos actuales (frescos)
-    from .rutas import get_examenes
-    # Nota: get_examenes(db) devuelve todos, filtramos los que nos interesan
     todos_procesados = get_examenes(db)
     for ex in todos_procesados:
         if ex.grupo_id in grupos_ids and ex.status in ['borrador', 'rechazado']:

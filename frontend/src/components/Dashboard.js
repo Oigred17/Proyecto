@@ -206,7 +206,7 @@ function Dashboard({ currentUser, onLogout }) {
         fetchExamenes();
         setTimeout(() => setShowNotification(false), 3000);
       } else {
-        alert(data.message);
+        alert(data.detail || data.message || "Error al enviar a revisión");
       }
     } catch (e) {
       alert("Error de conexión");
