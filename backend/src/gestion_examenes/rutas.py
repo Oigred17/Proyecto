@@ -48,7 +48,8 @@ def get_examenes(db: Session = Depends(obtener_db)):
         contains_eager(modelos_examenes.Examen.materia).joinedload(modelos_academica.Materia.carrera),
         joinedload(modelos_examenes.Examen.aula),
         joinedload(modelos_examenes.Examen.grupo),
-        joinedload(modelos_examenes.Examen.sinodal)
+        joinedload(modelos_examenes.Examen.sinodal),
+        joinedload(modelos_examenes.Examen.aplicador)
     ).all()
 
     # Pre-cargar horarios con materias para evitar N+1 y errores de detección
@@ -140,11 +141,14 @@ class GenerarExamenesSelection(BaseModel):
     materiaId: int
     grupoId: int
     academiaId: Optional[Union[int, str]] = None 
+    aplicadorId: Optional[int] = None
+    modalidad: Optional[str] = None
 
 class GenerarExamenesRequest(BaseModel):
     seleccion: List[GenerarExamenesSelection]
     tipoExamen: Optional[str] = 'Parcial 1'
     periodo: Optional[str] = None
+    modalidad: Optional[str] = 'Escrito'
 
 @router.post("/generar-examenes", response_model=List[esquemas.Examen])
 def generar_examenes(
@@ -155,10 +159,8 @@ def generar_examenes(
     try:
         print(f"DEBUG: Generando examenes para carrera={carrera_id}. Datos recibidos: {datos}")
         seleccion = datos.seleccion
-        print(f"DEBUG: Items recibidos en seleccion: {len(seleccion)}")
-        for s in seleccion:
-             print(f"  - Item: MateriaID={s.materiaId}, GrupoID={s.grupoId}")
         tipo_examen = (datos.tipoExamen or "PARCIAL").upper()
+        modalidad_global = datos.modalidad or "Escrito"
         from datetime import timedelta
         
         # Determinar duración del examen según el tipo
@@ -522,6 +524,8 @@ def generar_examenes(
                         fecha=fecha_final, hora_inicio=hora_inicio_final, hora_fin=hora_fin_final,
                         tipo=tipo_examen, materia_id=it.materiaId, aula_id=a_id,
                         grupo_id=it.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
+                        aplicador_id=it.aplicadorId,
+                        modalidad=it.modalidad or modalidad_global,
                         status='borrador'
                     ))
             else:
@@ -569,6 +573,8 @@ def generar_examenes(
                                             fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h.hora_fin,
                                             tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=aula_ok,
                                             grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
+                                            aplicador_id=materia_item.aplicadorId,
+                                            modalidad=materia_item.modalidad or modalidad_global,
                                             status='borrador'
                                         ))
                                         ex_creado = True
@@ -585,6 +591,8 @@ def generar_examenes(
                                             fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h.hora_fin,
                                             tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=None,
                                             grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
+                                            aplicador_id=materia_item.aplicadorId,
+                                            modalidad=materia_item.modalidad or modalidad_global,
                                             status='borrador'
                                         ))
                                         ex_creado = True
@@ -668,7 +676,10 @@ def generar_examenes(
                                 db.add(modelos_examenes.Examen(
                                     fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                     tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
-                                    grupo_id=it.grupoId, status='borrador'
+                                    grupo_id=it.grupoId, 
+                                    aplicador_id=it.aplicadorId,
+                                    modalidad=it.modalidad or modalidad_global,
+                                    status='borrador'
                                 ))
                                 ex_creado = True; break
                         else:
@@ -677,7 +688,10 @@ def generar_examenes(
                              db.add(modelos_examenes.Examen(
                                 fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=None,
-                                grupo_id=it.grupoId, status='borrador'
+                                grupo_id=it.grupoId, 
+                                aplicador_id=it.aplicadorId,
+                                modalidad=it.modalidad or modalidad_global,
+                                status='borrador'
                             ))
                              ex_creado = True; break
                     if ex_creado: break
@@ -701,7 +715,10 @@ def generar_examenes(
                             db.add(modelos_examenes.Examen(
                                 fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
-                                grupo_id=it.grupoId, status='borrador'
+                                grupo_id=it.grupoId, 
+                                aplicador_id=it.aplicadorId,
+                                modalidad=it.modalidad or modalidad_global,
+                                status='borrador'
                             ))
                             ex_creado = True; break
                     else:
@@ -711,7 +728,10 @@ def generar_examenes(
                              db.add(modelos_examenes.Examen(
                                 fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=None,
-                                grupo_id=it.grupoId, status='borrador'
+                                grupo_id=it.grupoId, 
+                                aplicador_id=it.aplicadorId,
+                                modalidad=it.modalidad or modalidad_global,
+                                status='borrador'
                             ))
                              ex_creado = True; break
             
@@ -727,7 +747,10 @@ def generar_examenes(
                                 db.add(modelos_examenes.Examen(
                                     fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
                                     tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
-                                    grupo_id=it.grupoId, status='borrador'
+                                    grupo_id=it.grupoId, 
+                                    aplicador_id=it.aplicadorId,
+                                    modalidad=it.modalidad or modalidad_global,
+                                    status='borrador'
                                 ))
                                 ex_creado = True; break
                         if ex_creado: break
@@ -757,6 +780,10 @@ def update_examen(examen_id: int, datos: esquemas.ExamenUpdate, db: Session = De
         examen.hora_fin = datos.hora_fin
     if datos.aula_id:
         examen.aula_id = datos.aula_id
+    if datos.aplicador_id:
+        examen.aplicador_id = datos.aplicador_id
+    if datos.modalidad:
+        examen.modalidad = datos.modalidad
         
     db.commit()
     db.refresh(examen)
@@ -766,7 +793,9 @@ def update_examen(examen_id: int, datos: esquemas.ExamenUpdate, db: Session = De
         joinedload(modelos_examenes.Examen.materia).joinedload(modelos_academica.Materia.profesor),
         joinedload(modelos_examenes.Examen.materia).joinedload(modelos_academica.Materia.carrera),
         joinedload(modelos_examenes.Examen.aula),
-        joinedload(modelos_examenes.Examen.grupo)
+        joinedload(modelos_examenes.Examen.grupo),
+        joinedload(modelos_examenes.Examen.sinodal),
+        joinedload(modelos_examenes.Examen.aplicador)
     ).filter(modelos_examenes.Examen.id == examen.id).first()
 
 @router.put("/examenes/{examen_id}/sinodal")

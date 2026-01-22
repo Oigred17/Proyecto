@@ -31,9 +31,49 @@ function Dashboard({ currentUser, onLogout }) {
   const [selectedGrupoIdForExamenes, setSelectedGrupoIdForExamenes] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('success'); // 'success', 'error', 'warning'
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
+  // State for Custom Modal (Confirm/Prompt)
+  const [customModal, setCustomModal] = useState({
+    show: false,
+    title: '',
+    message: '',
+    type: 'confirm', // 'confirm', 'danger', 'prompt'
+    icon: 'info', // 'info', 'warning', 'error'
+    onConfirm: null,
+    onCancel: null,
+    inputValue: ''
+  });
+
+  // Helper para mostrar notificaciones (Toasts)
+  const showToast = (message, type = 'success') => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 4000);
+  };
+
+  // Helper para diálogos de confirmación premium
+  const confirmCustom = ({ title, message, type = 'confirm', icon = 'warning', onConfirm, onCancel }) => {
+    setCustomModal({
+      show: true,
+      title,
+      message,
+      type,
+      icon,
+      onConfirm: () => {
+        if (onConfirm) onConfirm();
+        setCustomModal(prev => ({ ...prev, show: false }));
+      },
+      onCancel: () => {
+        if (onCancel) onCancel();
+        setCustomModal(prev => ({ ...prev, show: false }));
+      }
+    });
+  };
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -166,7 +206,8 @@ function Dashboard({ currentUser, onLogout }) {
         body: JSON.stringify({
           seleccion: selectionData.selection,
           tipoExamen: selectionData.tipoExamen,
-          periodo: selectionData.periodo
+          periodo: selectionData.periodo,
+          modalidad: selectionData.modalidad
         })
       });
 
@@ -175,11 +216,9 @@ function Dashboard({ currentUser, onLogout }) {
       fetchExamenes();
       setShowGenerateModal(false);
       setActiveView('Horarios');
-      setNotificationMessage('¡Exámenes generados exitosamente!');
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+      showToast('¡Exámenes generados exitosamente!', 'success');
     } catch (error) {
-      alert(`Error al generar exámenes: ${error.message}`);
+      showToast(`Error al generar exámenes: ${error.message}`, 'error');
     }
   };
 
@@ -190,26 +229,34 @@ function Dashboard({ currentUser, onLogout }) {
     const grupoIdToSend = selectedGrupoIdForExamenes || 0;
 
     if (grupoIdToSend === 0) {
-      if (!window.confirm("¿Estás seguro de enviar a revisión los exámenes de TODOS los grupos pendientes de esta carrera?")) {
-        return;
-      }
+      confirmCustom({
+        title: "Enviar Todos a Revisión",
+        message: "¿Estás seguro de enviar a revisión los exámenes de TODOS los grupos pendientes de esta carrera?",
+        type: 'confirm',
+        icon: 'info',
+        onConfirm: async () => {
+          await ejecutarEnvioRevision(selectedCarreraId, grupoIdToSend);
+        }
+      });
+    } else {
+      await ejecutarEnvioRevision(selectedCarreraId, grupoIdToSend);
     }
+  };
 
+  const ejecutarEnvioRevision = async (carreraId, grupoId) => {
     try {
-      const res = await fetch(`${API_URL}/examenes/enviar-revision?carrera_id=${selectedCarreraId}&grupo_id=${grupoIdToSend}`, {
+      const res = await fetch(`${API_URL}/examenes/enviar-revision?carrera_id=${carreraId}&grupo_id=${grupoId}`, {
         method: 'POST'
       });
       const data = await res.json();
       if (res.ok) {
-        setNotificationMessage(data.message);
-        setShowNotification(true);
+        showToast(data.message, 'success');
         fetchExamenes();
-        setTimeout(() => setShowNotification(false), 3000);
       } else {
-        alert(data.detail || data.message || "Error al enviar a revisión");
+        showToast(data.detail || data.message || "Error al enviar a revisión", 'error');
       }
     } catch (e) {
-      alert("Error de conexión");
+      showToast("Error de conexión", 'error');
     }
   };
 
@@ -220,25 +267,41 @@ function Dashboard({ currentUser, onLogout }) {
 
     const grupoIdToSend = selectedGrupoIdForExamenes || 0;
 
-    let motivo = "";
-    let comentarios = "";
-
     if (accion === 'rechazar') {
-      motivo = prompt("Motivo del rechazo (ej. Empalme, Aula no disponible):");
-      if (motivo === null) return; // Cancelled
-      comentarios = prompt("Observaciones adicionales (opcional):");
+      setCustomModal({
+        show: true,
+        title: "Rechazar Exámenes",
+        message: "Por favor indica el motivo del rechazo:",
+        type: 'prompt',
+        icon: 'warning',
+        inputValue: '',
+        onConfirm: (val) => {
+          if (!val) {
+            showToast("Debes indicar un motivo", 'error');
+            return;
+          }
+          finalizarRevisionAction(accion, grupoIdToSend, val, '');
+        },
+        onCancel: () => setCustomModal(prev => ({ ...prev, show: false }))
+      });
+      return;
     }
 
     if (grupoIdToSend === 0) {
-      const actionName = accion === 'aprobar' ? "APROBAR" : "RECHAZAR";
-      if (!window.confirm(`¿Estás seguro de ${actionName} los exámenes de TODOS los grupos pendientes de esta carrera?`)) {
-        return;
-      }
+      confirmCustom({
+        title: "Aprobar Carrera",
+        message: "¿Estás seguro de APROBAR los exámenes de TODOS los grupos pendientes de esta carrera?",
+        onConfirm: () => finalizarRevisionAction(accion, grupoIdToSend, '', '')
+      });
+    } else {
+      finalizarRevisionAction(accion, grupoIdToSend, '', '');
     }
+  };
 
+  const finalizarRevisionAction = async (accion, grupoId, motivo, comentarios) => {
     const payload = {
       carrera_id: selectedCarreraId,
-      grupo_id: grupoIdToSend,
+      grupo_id: grupoId,
       accion: accion,
       motivo: motivo,
       comentarios: comentarios
@@ -252,16 +315,14 @@ function Dashboard({ currentUser, onLogout }) {
       });
       const data = await res.json();
       if (res.ok) {
-        setNotificationMessage(accion === 'aprobar' ? "✅ Grupo Aprobado" : "❌ Grupo Rechazado");
-        setShowNotification(true);
+        showToast(accion === 'aprobar' ? "✅ Grupo Aprobado" : "❌ Grupo Rechazado", 'success');
         fetchExamenes();
-        setTimeout(() => setShowNotification(false), 3000);
       } else {
-        alert(data.message || "Error al procesar revisión");
+        showToast(data.message || "Error al procesar revisión", 'error');
       }
     } catch (e) {
       console.error(e);
-      alert("Error de conexión");
+      showToast("Error de conexión", 'error');
     }
   };
 
@@ -410,7 +471,7 @@ function Dashboard({ currentUser, onLogout }) {
                   onClick={() => {
                     const isPending = filteredExamenes.some(e => e.status === 'pendiente_aprobacion');
                     if (isPending) {
-                      alert("⚠️ Ya tienes exámenes enviados a revisión. Debes esperar a que Servicios Escolares los apruebe o rechace antes de generar nuevos.");
+                      showToast("Ya tienes exámenes enviados a revisión. Debes esperar a que Servicios Escolares los apruebe o rechace antes de generar nuevos.", "warning");
                       return;
                     }
                     handleGenerateExams();
@@ -450,6 +511,7 @@ function Dashboard({ currentUser, onLogout }) {
               <ExamScheduleDisplay
                 examenes={filteredExamenes.filter(e => e.status !== 'rechazado' && e.status !== 'aprobado')}
                 onRefresh={fetchExamenes}
+                showToast={showToast}
                 title={selectedCarreraName ? selectedCarreraName.toUpperCase() : "HORARIOS DE EXÁMENES"}
               >
                 <div className="examenes-filter-controls">
@@ -486,7 +548,7 @@ function Dashboard({ currentUser, onLogout }) {
                       onClick={() => {
                         const isPending = filteredExamenes.some(e => e.status === 'pendiente_aprobacion');
                         if (isPending) {
-                          alert("⚠️ Estos exámenes ya fueron enviados a revisión.");
+                          showToast("Estos exámenes ya fueron enviados a revisión.", "warning");
                           return;
                         }
                         handleEnviarRevision();
@@ -518,6 +580,7 @@ function Dashboard({ currentUser, onLogout }) {
               <ExamScheduleDisplay
                 examenes={filteredExamenes.filter(e => e.status === 'rechazado')}
                 onRefresh={fetchExamenes}
+                showToast={showToast}
                 title="EXÁMENES RECHAZADOS (CORREGIR)"
               >
                 <div className="examenes-filter-controls">
@@ -545,20 +608,22 @@ function Dashboard({ currentUser, onLogout }) {
             )}
 
             {activeView === 'Revisiones' && (
-              <ExamReview currentUser={currentUser} API_URL={API_URL} />
+              <ExamReview currentUser={currentUser} API_URL={API_URL} showToast={showToast} />
             )}
 
-            {activeView === 'Usuarios' && <UserManagement />}
-            {activeView === 'Sinodal' && <SinodalesView currentUser={currentUser} />}
-            {activeView === 'Archivos' && <ExamFiles currentUser={currentUser} API_URL={API_URL} />}
+            {activeView === 'Usuarios' && <UserManagement showToast={showToast} confirmCustom={confirmCustom} />}
+            {activeView === 'Sinodal' && <SinodalesView currentUser={currentUser} showToast={showToast} confirmCustom={confirmCustom} />}
+            {activeView === 'Archivos' && <ExamFiles currentUser={currentUser} API_URL={API_URL} showToast={showToast} />}
 
             {activeView === 'Inicio' && (
               <div className="welcome-container">
                 <div className="welcome-card">
                   <div className="welcome-icon">
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
+                    <svg viewBox="0 0 24 24" width="60" height="60" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"></path>
+                      <path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10"></path>
+                      <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+                      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.82-2.82L7 15"></path>
                     </svg>
                   </div>
                   <div className="welcome-text">
@@ -632,8 +697,31 @@ function Dashboard({ currentUser, onLogout }) {
         </main>
       </div>
       {showNotification && (
-        <div className={`notification bottom-right ${showNotification ? 'show' : ''}`}>
-          {notificationMessage}
+        <div className={`notification bottom-right ${notificationType} ${showNotification ? 'show' : ''}`}>
+          <div className="notification-icon">
+            {notificationType === 'success' && (
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            )}
+            {notificationType === 'error' && (
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            )}
+            {notificationType === 'warning' && (
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            )}
+          </div>
+          <div className="notification-content">
+            {notificationMessage}
+          </div>
         </div>
       )}
       {showGenerateModal && (
@@ -643,7 +731,68 @@ function Dashboard({ currentUser, onLogout }) {
           carreraId={selectedCarreraId || (currentUser && currentUser.role === 'jefe_carrera' && carreras.find(c => c.nombre === currentUser.carrera)?.id)}
           currentUser={currentUser}
           API_URL={API_URL}
+          showToast={showToast}
+          confirmCustom={confirmCustom}
         />
+      )}
+
+      {/* RENDER CUSTOM PREMIUM MODAL (Confirm/Prompt) */}
+      {customModal.show && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-container">
+            <div className={`custom-modal-icon ${customModal.icon}`}>
+              {customModal.icon === 'warning' && (
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              )}
+              {customModal.icon === 'error' && (
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+              )}
+              {customModal.icon === 'info' && (
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              )}
+            </div>
+            <h3 className="custom-modal-title">{customModal.title}</h3>
+            <p className="custom-modal-message">{customModal.message}</p>
+
+            {customModal.type === 'prompt' && (
+              <input
+                type="text"
+                className="custom-modal-input"
+                autoFocus
+                value={customModal.inputValue}
+                onChange={(e) => setCustomModal(prev => ({ ...prev, inputValue: e.target.value }))}
+                placeholder="Escribe aquí..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') customModal.onConfirm(customModal.inputValue);
+                }}
+              />
+            )}
+
+            <div className="custom-modal-actions">
+              <button className="btn-custom btn-custom-cancel" onClick={customModal.onCancel}>
+                Cancelar
+              </button>
+              <button
+                className={`btn-custom ${customModal.type === 'danger' ? 'btn-custom-danger' : 'btn-custom-confirm'}`}
+                onClick={() => customModal.onConfirm(customModal.type === 'prompt' ? customModal.inputValue : null)}
+              >
+                {customModal.type === 'prompt' ? 'Enviar' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

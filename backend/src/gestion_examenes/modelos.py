@@ -18,10 +18,12 @@ class Examen(Base):
     hora_inicio = Column(Time)
     hora_fin = Column(Time)
     tipo = Column(String)
+    modalidad = Column(String)
     materia_id = Column(Integer, ForeignKey('materias.id'))
     aula_id = Column(Integer, ForeignKey('aulas.id'))
     grupo_id = Column(Integer, ForeignKey('grupos.id'))
     sinodal_id = Column(Integer, ForeignKey('profesores.id'), nullable=True)
+    aplicador_id = Column(Integer, ForeignKey('profesores.id'), nullable=True)
     academia_id = Column(Integer, ForeignKey('academias.id'), nullable=True) 
 
     status = Column(String, default='borrador')
@@ -33,3 +35,4 @@ class Examen(Base):
     aula = relationship("Aula", back_populates="examenes")
     grupo = relationship("Grupo", back_populates="examenes")
     sinodal = relationship("Profesor", foreign_keys=[sinodal_id])
+    aplicador = relationship("Profesor", foreign_keys=[aplicador_id])

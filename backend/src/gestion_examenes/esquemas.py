@@ -20,10 +20,12 @@ class ExamenCreate(BaseModel):
     fecha: date
     hora_inicio: time
     hora_fin: time
-    tipo_examen_id: int
+    tipo: str
+    modalidad: Optional[str] = None
     materia_id: int
     aula_id: Optional[int] = None
     grupo_id: int
+    aplicador_id: Optional[int] = None
     observaciones: Optional[str] = None
 
 class ExamenUpdate(BaseModel):
@@ -31,6 +33,8 @@ class ExamenUpdate(BaseModel):
     hora_inicio: Optional[time] = None
     hora_fin: Optional[time] = None
     aula_id: Optional[int] = None
+    aplicador_id: Optional[int] = None
+    modalidad: Optional[str] = None
 
 class Examen(ExamenBase):
     id: int
@@ -38,11 +42,14 @@ class Examen(ExamenBase):
     aula_id: Optional[int] = None
     grupo_id: int
     sinodal_id: Optional[int] = None
+    aplicador_id: Optional[int] = None
+    modalidad: Optional[str] = None
     
     materia: Materia
     aula: Optional[Aula] = None
     grupo: Optional[Grupo] = None
     sinodal: Optional[Profesor] = None
+    aplicador: Optional[Profesor] = None
     tiene_conflictos: Optional[bool] = False
     detalles_conflicto: Optional[str] = None
     

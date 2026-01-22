@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import html2pdf from 'html2pdf.js';
 import './ExamFiles.css';
 
-function ExamFiles({ currentUser, API_URL }) {
+function ExamFiles({ currentUser, API_URL, showToast }) {
     const [carreras, setCarreras] = useState([]);
     const [examenes, setExamenes] = useState([]);
     const [selectedCarreraId, setSelectedCarreraId] = useState('');
@@ -61,6 +61,7 @@ function ExamFiles({ currentUser, API_URL }) {
         };
 
         html2pdf().set(opt).from(element).save();
+        if (showToast) showToast('Archivo PDF generado y descargado', 'success');
     };
 
     const filteredExamenes = examenes.filter(e => {
@@ -193,7 +194,16 @@ function ExamFiles({ currentUser, API_URL }) {
             )}
             {selectedCarreraId && filteredExamenes.length > 0 && (
                 <div className="welcome-card" style={{ marginTop: '20px' }}>
-                    <h3>📄 Vista Previa del Documento Oficial</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <h3 style={{ margin: 0 }}>Vista Previa del Documento Oficial</h3>
+                    </div>
                     <p>Se han encontrado {filteredExamenes.length} exámenes aprobados para {selectedCarreraObj?.nombre}.</p>
                     <p style={{ fontSize: '0.9em', color: '#666' }}>El diseño de abajo es exactamente lo que se guardará en el PDF.</p>
                 </div>

@@ -89,7 +89,7 @@
   right: 4px;
   min-width: 18px;
   height: 18px;
-  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  background-color: #e53e3e;
   border-radius: 9px;
   border: 2px solid white;
   display: flex;
@@ -228,7 +228,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #805ad5 0%, #667eea 100%);
+  background-color: #805ad5;
   color: white;
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@
 }
 
 .plan-button {
-  background: linear-gradient(135deg, #805ad5 0%, #667eea 100%);
+  background-color: #805ad5;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -273,9 +273,9 @@
 }
 
 .logout-theme {
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background-color: #4a5568;
 }
 
 .logout-theme:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  background-color: #dc2626;
 }

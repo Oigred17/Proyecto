@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SinodalesView.css';
 
-function SinodalesView({ currentUser }) {
+function SinodalesView({ currentUser, showToast }) {
     const [examenes, setExamenes] = useState([]);
     const [profesores, setProfesores] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -97,15 +97,15 @@ function SinodalesView({ currentUser }) {
 
             if (res.ok) {
                 const data = await res.json();
-                alert('Sinodal asignado correctamente');
+                showToast('Sinodal asignado correctamente', 'success');
                 fetchData(); // Refresh
             } else {
                 const errorData = await res.json().catch(() => ({ detail: 'Error al asignar sinodal' }));
-                alert(errorData.detail || 'Error al asignar sinodal');
+                showToast(errorData.detail || 'Error al asignar sinodal', 'error');
             }
         } catch (error) {
             console.error('Error assigning sinodal:', error);
-            alert('Error al asignar sinodal: ' + error.message);
+            showToast('Error al asignar sinodal: ' + error.message, 'error');
         }
     };
 

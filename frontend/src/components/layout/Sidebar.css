@@ -47,7 +47,7 @@
 }
 
 .sidebar-icon.active {
-  background: linear-gradient(135deg, #2C5F4F 0%, #1a3a30 100%);
+  background-color: #2C5F4F;
   color: white;
   box-shadow: 0 4px 12px rgba(44, 95, 79, 0.25);
 }
@@ -107,7 +107,7 @@
 }
 
 .sidebar-icon.active {
-  background: linear-gradient(135deg, #2C5F4F 0%, #1a3a30 100%);
+  background-color: #2C5F4F;
   color: white;
   box-shadow: 0 4px 12px rgba(44, 95, 79, 0.25);
 }

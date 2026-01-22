@@ -8,13 +8,15 @@ import './GenerateExamsModal.css';
  * - Visual indication of missing sinodales
  * - Academia selection restored
  */
-function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_URL }) {
+function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_URL, showToast }) {
   const [academias, setAcademias] = useState([]);
+  const [profesores, setProfesores] = useState([]);
   const [groupsData, setGroupsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
   const [tipoExamen, setTipoExamen] = useState('Parcial 1');
-  const [periodo, setPeriodo] = useState('2025-2'); // Optional: could be dynamic
+  const [modalidad, setModalidad] = useState('Escrito');
+  const [periodo, setPeriodo] = useState('2025-2');
   const [isGenerating, setIsGenerating] = useState(false);
   const [genMessage, setGenMessage] = useState('Calculando horarios y evitando conflictos...');
 
@@ -26,14 +28,19 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
       const carrerasData = await carreraRes.json();
       const currentCarrera = carrerasData.find(c => c.id === parseInt(carreraId));
 
-      // 2. Fetch Academias
-      const academiasRes = await fetch(`${API_URL}/academias`);
-      const acaData = await (academiasRes.ok ? academiasRes.json() : []);
-      setAcademias(acaData);
+      // 2. Fetch Academias and Profesores
+      const [academiasRes, profesoresRes, examenesRes] = await Promise.all([
+        fetch(`${API_URL}/academias`),
+        fetch(`${API_URL}/profesores`),
+        fetch(`${API_URL}/examenes`)
+      ]);
 
-      // 3. Fetch current exams to check for already assigned sinodales
-      const examenesRes = await fetch(`${API_URL}/examenes`);
+      const acaData = await (academiasRes.ok ? academiasRes.json() : []);
+      const profData = await (profesoresRes.ok ? profesoresRes.json() : []);
       const allExamenes = await (examenesRes.ok ? examenesRes.json() : []);
+
+      setAcademias(acaData);
+      setProfesores(profData);
 
       // 4. Process Groups from Horarios
       // We want to show which materias are actually assigned to each group
@@ -53,7 +60,9 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
             materiasMap[h.materia.id] = {
               id: h.materia.id,
               nombre: h.materia.nombre,
+              profesorId: h.materia.profesor?.id || null,
               profesor: h.materia.profesor?.nombre || 'Sin asignar',
+              aplicadorId: h.materia.profesor?.id || '',
               hasSinodal: !!existing?.sinodal_id,
               sinodalNombre: existing?.sinodal?.nombre || null,
               selected: true,
@@ -137,6 +146,20 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
     }));
   };
 
+  const setAplicadorValue = (groupId, materiaId, value) => {
+    setGroupsData(prev => prev.map(g => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          materias: g.materias.map(m =>
+            m.id === materiaId ? { ...m, aplicadorId: value } : m
+          )
+        };
+      }
+      return g;
+    }));
+  };
+
   const handleGenerateClick = () => {
     const selection = [];
     groupsData.forEach(g => {
@@ -145,14 +168,17 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
           selection.push({
             materiaId: m.id,
             grupoId: g.id,
-            academiaId: m.academiaId || null
+            academiaId: m.academiaId || null,
+            aplicadorId: m.aplicadorId || null,
+            modalidad: modalidad
           });
         }
       });
     });
 
     if (selection.length === 0) {
-      alert("Por favor selecciona al menos una materia.");
+      if (showToast) showToast("Por favor selecciona al menos una materia.", "warning");
+      else alert("Por favor selecciona al menos una materia.");
       return;
     }
 
@@ -165,7 +191,8 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
         await onGenerate({
           selection,
           tipoExamen,
-          periodo
+          periodo,
+          modalidad
         });
       } finally {
         setIsGenerating(false);
@@ -213,17 +240,23 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
 
         <div className="gem-content">
           <div className="gem-instruction blue-light">
-            <p><strong>Regla de Negocio:</strong> Se asignará automáticamente un solo examen por día para cada grupo para evitar sobrecarga de los estudiantes.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <p><strong>Regla de Negocio:</strong> Se asignará automáticamente un solo examen por día para cada grupo para evitar sobrecarga.</p>
+            </div>
           </div>
 
           <div className="gem-top-controls" style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div className="control-field">
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>TIPO DE EXAMEN</label>
+              <label className="field-label-premium">TIPO DE EXAMEN</label>
               <select
-                className="gem-select-main"
+                className="gem-select-premium"
                 value={tipoExamen}
                 onChange={e => setTipoExamen(e.target.value)}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', minWidth: '180px' }}
               >
                 <option value="Parcial 1">Parcial 1</option>
                 <option value="Parcial 2">Parcial 2</option>
@@ -235,26 +268,37 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
             </div>
 
             <div className="control-field">
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>PERIODO</label>
+              <label className="field-label-premium">PERIODO</label>
               <input
                 type="text"
-                className="gem-input-main"
+                className="gem-input-premium"
                 value={periodo}
                 onChange={e => setPeriodo(e.target.value)}
                 placeholder="Ej. 2025-2"
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
               />
             </div>
 
-            <div className="control-field" style={{ flex: 1, minWidth: '200px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '5px' }}>FILTRAR GRUPO O MATERIA</label>
+            <div className="control-field">
+              <label className="field-label-premium">MODALIDAD</label>
+              <select
+                className="gem-select-premium"
+                value={modalidad}
+                onChange={e => setModalidad(e.target.value)}
+              >
+                <option value="Escrito">Escrito</option>
+                <option value="Digital">Digital</option>
+              </select>
+            </div>
+
+            <div className="control-field" style={{ flex: 1, minWidth: '180px' }}>
+              <label className="field-label-premium">FILTRAR GRUPO O MATERIA</label>
               <input
                 type="text"
-                className="gem-input-main"
+                className="gem-input-premium"
                 value={filterText}
                 onChange={e => setFilterText(e.target.value)}
                 placeholder="Buscar..."
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%' }}
+                style={{ width: '100%' }}
               />
             </div>
 
@@ -293,10 +337,11 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                       <thead>
                         <tr>
                           <th style={{ width: '40px' }}></th>
-                          <th>Materia</th>
+                          <th style={{ width: '25%' }}>Materia</th>
                           <th>Docente Titular</th>
-                          <th>Estado Sinodal</th>
+                          <th>Docente Aplicador</th>
                           <th>Academia</th>
+                          <th>Estado</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -318,15 +363,17 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                               </div>
                             </td>
                             <td className="m-text-muted">{m.profesor}</td>
-                            <td>
-                              {m.hasSinodal ? (
-                                <div className="sinodal-assigned">
-                                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#059669" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                  <span>{m.sinodalNombre || 'Asignado'}</span>
-                                </div>
-                              ) : (
-                                <span className="sinodal-missing">Pendiente de Sinodal</span>
-                              )}
+                            <td onClick={e => e.stopPropagation()}>
+                              <select
+                                className="gem-select-inner"
+                                value={m.aplicadorId}
+                                onChange={e => setAplicadorValue(group.id, m.id, e.target.value)}
+                                disabled={!m.selected}
+                              >
+                                {profesores.map(p => (
+                                  <option key={p.id} value={p.id}>{p.nombre}</option>
+                                ))}
+                              </select>
                             </td>
                             <td onClick={e => e.stopPropagation()}>
                               <select
@@ -335,12 +382,30 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                                 onChange={e => setAcademiaValue(group.id, m.id, e.target.value)}
                                 disabled={!m.selected}
                               >
-                                <option value="">¿Tiene Academia?</option>
-                                <option value="si">Sí (General)</option>
+                                <option value="">No aplica</option>
+                                <option value="si">Academia General</option>
                                 {academias.map(aca => (
                                   <option key={aca.id} value={aca.id}>{aca.nombre}</option>
                                 ))}
                               </select>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              {m.hasSinodal ? (
+                                <div className="status-indicator ok" title={m.sinodalNombre || 'Sinodal Asignado'}>
+                                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                  </svg>
+                                </div>
+                              ) : (
+                                <div className="status-indicator warning" title="Pendiente de Sinodal">
+                                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                  </svg>
+                                </div>
+                              )}
                             </td>
                           </tr>
                         ))}

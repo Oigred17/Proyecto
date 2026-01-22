@@ -29,8 +29,7 @@ function App() {
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.detail || 'Credenciales incorrectas');
-        return false;
+        return { success: false, message: error.detail || 'Credenciales incorrectas' };
       }
 
       const data = await response.json();
@@ -49,11 +48,10 @@ function App() {
         carrera: carrera
       });
 
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      alert('Error al iniciar sesión. Verifique sus credenciales.');
-      return false;
+      return { success: false, message: 'Error de conexión con el servidor' };
     }
   };
 

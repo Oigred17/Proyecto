@@ -1,45 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .exam-schedule-container {
-  padding: 30px;
+  padding: 40px;
   background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 32px;
+  box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.08), 0 18px 36px -18px rgba(15, 23, 42, 0.05);
   margin-top: 24px;
   font-family: 'Inter', sans-serif;
   border: 1px solid #f1f5f9;
 }
 
-.examenes-filter-controls {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.exam-schedule-empty {
-  text-align: center;
-  padding: 60px;
-  color: #64748b;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 2px dashed #cbd5e1;
-}
-
-.empty-state-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.7;
-}
-
 .table-header-title {
-  text-align: left;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.5rem;
-  margin-bottom: 24px;
   color: #0f172a;
   letter-spacing: -0.025em;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #e2e8f0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -49,15 +24,15 @@
   content: '';
   display: block;
   width: 6px;
-  height: 32px;
-  background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+  height: 28px;
+  background: #3b82f6;
   border-radius: 4px;
 }
 
 .table-responsive {
   overflow-x: auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
 }
 
 .schedule-table {
@@ -68,176 +43,162 @@
 }
 
 .schedule-table th {
-  background-color: #1e293b;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 16px 20px;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+  padding: 20px 24px;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  border-bottom: 1px solid #334155;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  border-bottom: 1px solid #e2e8f0;
   text-align: left;
 }
 
-.schedule-table th:first-child {
-  border-top-left-radius: 12px;
-}
-
-.schedule-table th:last-child {
-  border-top-right-radius: 12px;
-}
-
 .schedule-table td {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 0.95rem;
-  color: #334155;
+  padding: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: #1e293b;
   vertical-align: middle;
-  transition: background-color 0.2s;
 }
 
-.schedule-table tr:last-child td {
-  border-bottom: none;
+.row-even {
+  background-color: #ffffff;
 }
 
-/* Column Specific Styles */
-.th-grupo,
+.row-odd {
+  background-color: #fcfdfe;
+}
+
 .td-grupo {
-  width: 120px;
   text-align: center !important;
-  font-weight: 700;
+  font-weight: 800;
   background-color: #f8fafc;
-  color: #0f172a;
+  color: #3b82f6;
   border-right: 1px solid #e2e8f0;
-}
-
-.td-grupo {
-  font-size: 1.1rem;
-  color: #2563eb;
+  font-size: 1.1rem !important;
 }
 
 .td-materia {
-  font-weight: 600;
-  color: #1e293b;
-  font-size: 1rem;
-}
-
-.td-profesor {
-  color: #64748b;
-  font-style: normal;
-  font-size: 0.9rem;
-}
-
-.td-fecha,
-.td-hora {
-  font-family: 'Inter', sans-serif;
-  /* Keep same font for consistency, or mono if preferred */
-  font-feature-settings: "tnum";
-  font-weight: 500;
+  font-weight: 700;
   color: #0f172a;
 }
 
-.td-aula {
+.text-secondary {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.badge-modalidad {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-modalidad.escrito {
+  background-color: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
+}
+
+.badge-modalidad.digital {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.time-display-premium {
+  font-weight: 700;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.aula-tag {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.aula-tag-none {
+  background: #f8fafc;
+  color: #94a3b8;
+  padding: 4px 12px;
+  border-radius: 8px;
   font-weight: 600;
-  color: #059669;
-  /* Green hue for location */
+  font-size: 0.8rem;
+  border: 1px dashed #cbd5e1;
 }
 
-/* Actions */
-.td-actions {
-  text-align: center !important;
-  width: 100px;
-}
-
-/* Hover Effects */
-.schedule-table tr:hover td:not(.td-grupo) {
-  background-color: #f1f5f9;
-}
-
-/* Edit Inputs */
-.edit-input,
-.edit-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #1e293b;
-  background-color: #fff;
-  transition: all 0.2s ease;
-}
-
-.edit-input:focus,
-.edit-select:focus {
-  border-color: #3b82f6;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.time-edit-container {
+.btn-edit-premium {
+  background: white;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.time-sm {
-  min-width: 80px;
-}
-
-/* Buttons */
-.btn-edit,
-.btn-save,
-.btn-cancel {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  margin: 0 2px;
+  transition: all 0.2s;
 }
 
-.btn-edit {
+.btn-edit-premium:hover {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.exam-schedule-empty {
+  text-align: center;
+  padding: 80px 40px;
+  background: #f8fafc;
+  border-radius: 20px;
+  border: 2px dashed #e2e8f0;
   color: #64748b;
 }
 
-.btn-edit:hover {
-  background-color: #e0f2fe;
-  color: #0284c7;
-  transform: translateY(-1px);
+.empty-state-icon {
+  margin-bottom: 24px;
+  opacity: 0.5;
 }
 
-.btn-save {
-  background-color: #dcfce7;
-  color: #166534;
+.td-semester-header {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  font-weight: 800;
+  padding: 12px 24px !important;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  border: none !important;
+  border-bottom: 2px solid #f1f5f9 !important;
+  border-top: 2px solid #f1f5f9 !important;
 }
 
-.btn-save:hover {
-  background-color: #bbf7d0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.semester-divider-row td {
+  border-bottom: none !important;
 }
 
-.btn-cancel {
-  background-color: #fee2e2;
-  color: #991b1b;
+.group-spacer {
+  height: 16px;
 }
 
-.btn-cancel:hover {
-  background-color: #fecaca;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.th-rechazo {
-  background-color: #451a1a !important;
-  /* Darker red for contrast */
-  color: #fff !important;
-}
-
-.td-rechazo {
-  font-size: 0.85rem !important;
-  max-width: 200px;
-  line-height: 1.4;
+.group-spacer td {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  height: 16px;
 }

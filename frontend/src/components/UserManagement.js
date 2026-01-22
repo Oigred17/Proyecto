@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './UserManagement.css';
 
-function UserManagement() {
+function UserManagement({ showToast, confirmCustom }) {
     const [users, setUsers] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newUser, setNewUser] = useState({
@@ -52,24 +52,29 @@ function UserManagement() {
                     role: 'servicios_escolares'
                 });
                 fetchUsers(); // Refrescar la lista
-                alert('Usuario creado exitosamente');
+                showToast('Usuario creado exitosamente', 'success');
             } else {
                 const error = await response.json();
-                alert(`Error: ${error.detail}`);
+                showToast(`Error: ${error.detail}`, 'error');
             }
         } catch (error) {
             console.error('Error creating user:', error);
-            alert('Error al crear usuario');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDeleteUser = async (userId) => {
-        if (!window.confirm('¿Está seguro de eliminar este usuario?')) {
-            return;
-        }
+    const handleDeleteUser = (userId) => {
+        confirmCustom({
+            title: "Eliminar Usuario",
+            message: "¿Está seguro de eliminar este usuario? Esta acción no se puede deshacer.",
+            type: 'danger',
+            icon: 'error',
+            onConfirm: () => ejecutarBorradoUsuario(userId)
+        });
+    };
 
+    const ejecutarBorradoUsuario = async (userId) => {
         try {
             const response = await fetch(`${API_URL}/users/${userId}`, {
                 method: 'DELETE',
@@ -77,13 +82,13 @@ function UserManagement() {
 
             if (response.ok) {
                 fetchUsers(); // Refrescar la lista
-                alert('Usuario eliminado exitosamente');
+                showToast('Usuario eliminado exitosamente', 'success');
             } else {
-                alert('Error al eliminar usuario');
+                showToast('Error al eliminar usuario', 'error');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('Error al eliminar usuario');
+            showToast('Error al eliminar usuario', 'error');
         }
     };
 
