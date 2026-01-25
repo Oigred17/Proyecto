@@ -1,16 +1,17 @@
-# Estructura de integracion_horarios - Reorganizada
+# Módulo de Integración con API Externa de Horarios
 
-## 📁 Nueva Estructura
+## 📁 Estructura
 
 ```
 integracion_horarios/
 ├── __init__.py
-├── rutas.py                      # Endpoints FastAPI para API externa
+├── rutas.py                      # Endpoints FastAPI para consumir API externa
+├── esquemas.py                   # Pydantic schemas para validación
 ├── core/                         # Configuración y utilidades base
 │   ├── __init__.py
 │   ├── config.py                 # Configuración (API_HORARIOS, PERIODO_ACTUAL)
 │   └── base_sync.py              # Servicio base para consultas HTTP
-└── servicios/                    # Servicios para cada recurso
+└── services/                     # Servicios para cada recurso
     ├── __init__.py
     ├── periodo_service.py        # Consulta periodos académicos
     ├── carrera_service.py        # Consulta carreras
@@ -19,85 +20,59 @@ integracion_horarios/
     └── horario_service.py        # Consulta horarios
 ```
 
-## ✅ Cambios Realizados
+## 📝 Descripción
 
-### 1. Reorganización de archivos
-- **Movido** `config.py` → `core/config.py`
-- **Movido** `base_sync.py` → `core/base_sync.py`
-- **Actualizado** config.py para no requerir `pydantic_settings`
-- **Actualizados** todos los imports en servicios y rutas
+Este módulo proporciona integración con la API externa de horarios (`serv-horarios.unsis.lan`). Implementa una capa de abstracción que permite consultar:
 
-### 2. Schemas actualizados
-Todos los schemas ahora coinciden con los de `consulta_api`:
+- **Periodos académicos** actuales y vigentes
+- **Carreras** activas en la institución
+- **Grupos** por periodo y carrera
+- **Aulas** disponibles con capacidad y equipamiento
+- **Horarios** por profesor y grupo
 
-- **PeriodoSchema**: `clave`, `nombre`, `tipo`, `fInicio`, `fFin`
-- **CarreraSchema**: `clave`, `nombre`, `vigente`
-- **GrupoSchema**: `clave`, `nombre`, `carrera`, `semestre`, `alumnos`, `periodo`
-- **AulaSchema**: `clave`, `nombre`, `capacidad`, `tipo`, `statusProyector`
-- **HorarioSchema**: `rowId`, `idprofesor`, `nombreCompleto`, `asignatura`, `idGrupo`, `idAula`, `dia`, `hora`, `carrera`, `periodog`, `materia`, `nombreGrupo`, `nombreAula`
+## 🎯 Schemas Definidos
 
-### 3. Correcciones importantes
+### `HorarioExterno`
+Representa un horario obtenido de la API externa.
 
-#### Periodo
-- ✅ Corregido: Ahora extrae `clave` del JSON en lugar de `periodo` inexistente
-- ✅ Schema completo con todos los campos (`clave`, `nombre`, `tipo`, `fInicio`, `fFin`)
+### `CarreraExterna`
+Información de una carrera (clave, nombre, vigencia).
 
-#### Horarios
-- ⚠️ **IMPORTANTE**: La API externa NO tiene endpoint `GET /horarios?periodo=XXX`
-- ✅ Solo existen endpoints específicos:
-  - `GET /horarios/{periodo}/{idprofesor}` - Por profesor
-  - `GET /horarios/{periodo}/grupo/{idGrupo}` - Por grupo
-- ✅ `obtener_todos_horarios()` ahora lanza `NotImplementedError`
-- ✅ `setup.py` actualizado para usar JSON local como fuente principal
+### `GrupoExterno`
+Datos de un grupo académico.
+
+### `AulaExterna`
+Información de un aula (nombre, capacidad, tipo).
+
+### `PeriodoExterno`
+Periodo académico (clave, nombre, estado).
+
+### `APIExternaHealth`
+Respuesta del health check de la API.
 
 ## 🌐 Endpoints Disponibles
 
 ### Estado
-- `GET /api/horarios-externos/health` - Verifica disponibilidad de API
+- `GET /api/horarios-externos/health` - Verifica disponibilidad de API externa
 
 ### Periodo
-- `GET /api/horarios-externos/periodo/actual` - Obtiene periodo actual
+- `GET /api/horarios-externos/periodo/actual` - Obtiene periodo académico actual
 
 ### Carreras
-- `GET /api/horarios-externos/carreras` - Obtiene carreras vigentes
+- `GET /api/horarios-externos/carreras` - Lista todas las carreras vigentes
 
 ### Grupos
-- `GET /api/horarios-externos/grupos?periodo=XXXX` - Obtiene grupos por periodo
+- `GET /api/horarios-externos/grupos?periodo=XXXX` - Grupos por periodo
+- `GET /api/horarios-externos/grupos/carrera/{clave}?periodo=XXXX` - Grupos por carrera
 
 ### Aulas
-- `GET /api/horarios-externos/aulas?page=1&size=200` - Obtiene aulas paginadas
-- `GET /api/horarios-externos/aulas/disponibles?periodo=X&capacidad=X&dia=X&hora=X` - Aulas disponibles
-- `GET /api/horarios-externos/aulas/capacidad/{capacidad}` - Aulas por capacidad mínima
+- `GET /api/horarios-externos/aulas?page=1&size=200` - Lista aulas paginadas
 
 ### Horarios
-- `GET /api/horarios-externos/horarios/profesor/{idprofesor}?periodo=XXXX` - Horarios de profesor
-- `GET /api/horarios-externos/horarios/grupo/{idGrupo}?periodo=XXXX` - Horarios de grupo
+- `GET /api/horarios-externos/horarios/profesor/{id}?periodo=XXXX` - Horarios de profesor
+- `GET /api/horarios-externos/horarios/grupo/{id}?periodo=XXXX` - Horarios de grupo
 
-## ✅ Pruebas Realizadas
-
-```bash
-# Periodo
-✓ Periodo obtenido: {'clave': '2526A', 'nombre': 'SEMESTREOCT/25-FEB/26', ...}
-
-# Carreras
-✓ Se obtuvieron 31 carreras
-  Ejemplo: {'clave': '01B', 'nombre': 'LICENCIATURA EN ADMINISTRACIÓN MUNICIPAL 2015', 'vigente': True}
-
-# Grupos
-✓ Se obtuvieron 111 grupos
-  Ejemplo: {'nombre': '104-A', 'carrera': '04B', ...}
-
-# Aulas
-✓ Se obtuvieron 150 aulas
-  Ejemplo: {'nombre': 'A1', 'capacidad': 18, ...}
-
-# Horarios por profesor
-✓ Endpoint funcional (retorna lista de horarios del profesor)
-```
-
-## 🔧 Uso
-
-### Desde Python
+## 🔧 Uso desde Python
 ```python
 from src.integracion_horarios.servicios.periodo_service import PeriodoService
 from src.integracion_horarios.servicios.carrera_service import CarreraService
@@ -122,36 +97,84 @@ grupos = service.obtener_grupos_por_periodo(periodo="2526A")
 service = AulaService()
 aulas = service.obtener_todas_aulas(page=1, size=200)
 
+```python
+from src.integracion_horarios.services.periodo_service import PeriodoService
+from src.integracion_horarios.services.carrera_service import CarreraService
+from src.integracion_horarios.services.horario_service import HorarioService
+
+# Obtener periodo actual
+periodo_service = PeriodoService()
+periodo = periodo_service.obtener_periodo_actual()
+
+# Obtener carreras vigentes
+carrera_service = CarreraService()
+carreras = carrera_service.obtener_todas_carreras()
+
 # Horarios por profesor
-service = HorarioService()
-horarios = service.obtener_por_profesor(periodo="2526A", idprofesor="P3060")
+horario_service = HorarioService()
+horarios = horario_service.obtener_por_profesor(periodo="2526A", idprofesor="P3060")
 
 # Horarios por grupo
-horarios = service.obtener_por_grupo(periodo="2526A", idGrupo="116A")
+horarios = horario_service.obtener_por_grupo(periodo="2526A", idGrupo="116A")
 ```
 
-### Desde FastAPI
-Los endpoints están registrados en `src/main.py` bajo el prefijo `/api/horarios-externos`
+### Desde API REST
+Los endpoints están disponibles bajo `/api/horarios-externos`:
+
+```bash
+# Health check
+curl http://localhost:8000/api/horarios-externos/health
+
+# Periodo actual
+curl http://localhost:8000/api/horarios-externos/periodo/actual
+
+# Carreras
+curl http://localhost:8000/api/horarios-externos/carreras
+
+# Grupos
+curl http://localhost:8000/api/horarios-externos/grupos?periodo=2526A
+
+# Horarios por grupo
+curl http://localhost:8000/api/horarios-externos/horarios/grupo/106-A?periodo=2526A
+```
+
+## ⚙️ Configuración
+
+Variables de entorno (opcional):
+
+```bash
+API_HORARIOS=http://serv-horarios.unsis.lan/api
+PERIODO_ACTUAL=2526A
+```
+
+## 📋 Tests
+
+Los tests están en `/backend/tests/test_integracion_horarios.py`:
+
+```bash
+# Ejecutar tests
+cd backend
+python -m pytest tests/test_integracion_horarios.py -v
+```
 
 ## ⚠️ Notas Importantes
 
-1. **API Externa**: Se conecta a `http://serv-horarios.unsis.lan/api`
-2. **Horarios completos**: NO disponibles en API externa, usar JSON local
-3. **Timeout**: 30 segundos por defecto
-4. **Reintentos**: 3 intentos automáticos con backoff exponencial
-5. **Periodo por defecto**: `2526A` (configurable vía env var `PERIODO_ACTUAL`)
+1. **API Externa**: Debe estar accesible en `http://serv-horarios.unsis.lan/api`
+2. **Timeout**: 30 segundos por defecto para cada request
+3. **Manejo de errores**: Los endpoints retornan HTTP 503 si la API externa no está disponible
+4. **Cache**: No implementado - cada consulta va directamente a la API externa
+5. **Periodo por defecto**: `2526A` (configurable)
 
-## 🔄 Comparación con consulta_api
+## 🔄 Flujo de Datos
 
-| Aspecto | consulta_api | integracion_horarios (Proyecto) |
-|---------|--------------|--------------------------------|
-| Estructura | ✅ Ordenada (core/, services/, endpoints/) | ✅ Ahora igual |
-| Schemas | ✅ Completos | ✅ Ahora iguales |
-| Base Sync | ✅ Funcional | ✅ Copiado igual |
-| Config | ✅ Settings class | ✅ Ahora igual |
-| Endpoints | ✅ Todos funcionan | ✅ Actualizados |
-| BD Local | ✅ Sincronización | ❌ Solo consulta |
+```
+Frontend → Backend (rutas.py) → Services → API Externa → Response
+              ↓
+          esquemas.py (validación)
+```
 
-## 🎯 Resultado
+## 📦 Dependencias
 
-La estructura de `integracion_horarios` ahora es **idéntica** a `consulta_api`, con schemas completos y actualizados. Todos los endpoints que existen en la API externa funcionan correctamente.
+- `requests`: Para HTTP requests a la API externa
+- `pydantic`: Para validación de schemas
+- `fastapi`: Para endpoints REST

@@ -25,8 +25,8 @@ from src.gestion_horarios.modelos import Horario
 from src.gestion_examenes.modelos import Examen
 
 # Importar servicios de integración con API externa
-from src.integracion_horarios.servicios.horario_service import HorarioService
-from src.integracion_horarios.servicios.periodo_service import PeriodoService
+from src.integracion_horarios.services.horario_service import HorarioService
+from src.integracion_horarios.services.periodo_service import PeriodoService
 from src.integracion_horarios.core.config import settings as horarios_config
 
 logger = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ def populate_from_api():
     # Obtener carreras de la API para crear mapeo clave -> nombre
     carrera_map = {}
     try:
-        from src.integracion_horarios.servicios.carrera_service import CarreraService
+        from src.integracion_horarios.services.carrera_service import CarreraService
         carrera_service = CarreraService()
         carreras_api = carrera_service.obtener_todas_carreras()
         carrera_map = {c['clave']: c['nombre'] for c in carreras_api if c.get('vigente', True)}
@@ -133,7 +133,7 @@ def populate_from_api():
             print(f"⚠️  No se pudo obtener periodo de API, usando configurado: {periodo_actual}")
         
         # Obtener grupos del periodo actual
-        from src.integracion_horarios.servicios.grupo_service import GrupoService
+        from src.integracion_horarios.services.grupo_service import GrupoService
         grupo_service = GrupoService()
         grupos_data = grupo_service.obtener_grupos_por_periodo(periodo=periodo_actual)
         
@@ -364,7 +364,7 @@ def create_system_users():
         
         # Obtener carreras de la API para tener nombres completos
         try:
-            from src.integracion_horarios.servicios.carrera_service import CarreraService
+            from src.integracion_horarios.services.carrera_service import CarreraService
             carrera_service = CarreraService()
             carreras_api = carrera_service.obtener_todas_carreras()
             

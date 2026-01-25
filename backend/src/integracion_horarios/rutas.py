@@ -1,22 +1,30 @@
 """Rutas para consultar la API externa de horarios."""
 from fastapi import APIRouter, HTTPException
-from typing import Optional
+from typing import Optional, List
 from requests.exceptions import ConnectionError, Timeout
 import logging
 
-from .servicios.horario_service import HorarioService
-from .servicios.aula_service import AulaService
-from .servicios.periodo_service import PeriodoService
-from .servicios.carrera_service import CarreraService
-from .servicios.grupo_service import GrupoService
+from .services.horario_service import HorarioService
+from .services.aula_service import AulaService
+from .services.periodo_service import PeriodoService
+from .services.carrera_service import CarreraService
+from .services.grupo_service import GrupoService
 from .core.config import settings
+from .esquemas import (
+    HorarioExterno,
+    CarreraExterna,
+    GrupoExterno,
+    AulaExterna,
+    PeriodoExterno,
+    APIExternaHealth
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/horarios-externos", tags=["API Externa de Horarios"])
 
 # ==================== HEALTH CHECK ====================
-@router.get("/health")
+@router.get("/health", response_model=APIExternaHealth)
 def verificar_api_externa():
     """Verifica si la API externa de horarios está disponible."""
     try:
@@ -59,7 +67,7 @@ def manejar_error_api(e: Exception):
         )
 
 # ==================== PERIODO ====================
-@router.get("/periodo/actual")
+@router.get("/periodo/actual", response_model=PeriodoExterno)
 def obtener_periodo_actual():
     """Obtiene el periodo académico actual de la API externa."""
     try:
@@ -69,7 +77,7 @@ def obtener_periodo_actual():
         manejar_error_api(e)
 
 # ==================== CARRERAS ====================
-@router.get("/carreras")
+@router.get("/carreras", response_model=List[CarreraExterna])
 def obtener_carreras():
     """Obtiene todas las carreras vigentes de la API externa."""
     try:
@@ -79,7 +87,7 @@ def obtener_carreras():
         manejar_error_api(e)
 
 # ==================== GRUPOS ====================
-@router.get("/grupos")
+@router.get("/grupos", response_model=List[GrupoExterno])
 def obtener_grupos(periodo: Optional[str] = None):
     """Obtiene grupos por periodo de la API externa."""
     try:
@@ -88,7 +96,7 @@ def obtener_grupos(periodo: Optional[str] = None):
     except Exception as e:
         manejar_error_api(e)
 
-@router.get("/grupos/carrera/{clave_carrera}")
+@router.get("/grupos/carrera/{clave_carrera}", response_model=List[GrupoExterno])
 def obtener_grupos_por_carrera(clave_carrera: str, periodo: Optional[str] = None):
     """Obtiene grupos de una carrera específica en un periodo de la API externa."""
     try:
