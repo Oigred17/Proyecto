@@ -21,6 +21,7 @@ const getDayOfWeek = (dateString) => {
 
 function Dashboard({ currentUser, onLogout }) {
   const [carreras, setCarreras] = useState([]);
+  const [grupos, setGrupos] = useState([]);
   const [horarios, setHorarios] = useState([]);
   const [examenes, setExamenes] = useState([]);
   const [selectedCarreraName, setSelectedCarreraName] = useState('');
@@ -87,39 +88,89 @@ function Dashboard({ currentUser, onLogout }) {
     return () => clearInterval(interval);
   }, [currentUser]);
 
+  // Recargar grupos cuando cambia la carrera seleccionada (solo para servicios escolares)
+  useEffect(() => {
+    if (currentUser && (currentUser.role === 'servicios_escolares' || currentUser.role === 'administrador')) {
+      if (selectedCarreraId) {
+        // Recargar grupos filtrados por la carrera seleccionada
+        fetch(`${API_URL}/grupos-filtrados?rol=${currentUser.role}&carrera_seleccionada_id=${selectedCarreraId}`)
+          .then(res => res.json())
+          .then(gruposData => {
+            setGrupos(gruposData);
+          })
+          .catch(err => console.error('Error al cargar grupos filtrados:', err));
+      } else {
+        // Si no hay carrera seleccionada, cargar todos los grupos
+        fetch(`${API_URL}/grupos-filtrados?rol=${currentUser.role}`)
+          .then(res => res.json())
+          .then(gruposData => {
+            setGrupos(gruposData);
+          })
+          .catch(err => console.error('Error al cargar todos los grupos:', err));
+      }
+    }
+  }, [selectedCarreraId, currentUser, API_URL]);
+
   const fetchData = () => {
-    fetch(`${API_URL}/carreras`)
+    // Usar endpoint filtrado según rol
+    let carrerasUrl = `${API_URL}/carreras-filtradas?rol=${currentUser.role}`;
+    if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+      carrerasUrl += `&clave_carrera=${currentUser.carrera}`;
+    }
+    
+    fetch(carrerasUrl)
       .then(response => response.json())
       .then(data => {
         if (!Array.isArray(data)) {
           console.error("Error: Carreras no es un array", data);
           return;
         }
-        let filteredCarreras = data;
-        if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-          filteredCarreras = data.filter(c => c.nombre === currentUser.carrera);
-          if (filteredCarreras.length > 0) {
-            const carrera = filteredCarreras[0];
-            setSelectedCarreraName(carrera.nombre);
-            setSelectedCarreraId(carrera.id);
-          }
+        
+        // Para jefe_carrera, auto-seleccionar su carrera
+        if (currentUser && currentUser.role === 'jefe_carrera' && data.length > 0) {
+          const carrera = data[0];
+          setSelectedCarreraName(carrera.nombre);
+          setSelectedCarreraId(carrera.id);
         }
-        setCarreras(filteredCarreras);
+        
+        setCarreras(data);
+        
+        // Obtener grupos filtrados
+        let gruposUrl = `${API_URL}/grupos-filtrados?rol=${currentUser.role}`;
+        if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+          gruposUrl += `&clave_carrera=${currentUser.carrera}`;
+        }
+        
+        fetch(gruposUrl)
+          .then(res => res.json())
+          .then(gruposData => {
+            setGrupos(gruposData);
+          })
+          .catch(err => console.error('Error al cargar grupos:', err));
 
-        const allHorarios = filteredCarreras.flatMap(carrera => {
-          if (!carrera || !carrera.grupos || !Array.isArray(carrera.grupos)) return [];
-          return carrera.grupos.flatMap(grupo => {
-            if (!grupo || !grupo.horarios || !Array.isArray(grupo.horarios)) return [];
-            return grupo.horarios.map(horario => ({
-              ...horario,
-              carrera_name: carrera.nombre,
-              carrera_id: carrera.id,
-              grupo_name: grupo.nombre_grupo,
-              grupo_id: grupo.id,
-            }));
+        // Obtener horarios completos de las carreras filtradas
+        // Necesitamos hacer fetch de carreras completas para obtener horarios
+        fetch(`${API_URL}/carreras`)
+          .then(res => res.json())
+          .then(fullCarreras => {
+            const carreraIds = data.map(c => c.id);
+            const filteredFullCarreras = fullCarreras.filter(c => carreraIds.includes(c.id));
+            
+            const allHorarios = filteredFullCarreras.flatMap(carrera => {
+              if (!carrera || !carrera.grupos || !Array.isArray(carrera.grupos)) return [];
+              return carrera.grupos.flatMap(grupo => {
+                if (!grupo || !grupo.horarios || !Array.isArray(grupo.horarios)) return [];
+                return grupo.horarios.map(horario => ({
+                  ...horario,
+                  carrera_name: carrera.nombre,
+                  carrera_id: carrera.id,
+                  grupo_name: grupo.nombre_grupo,
+                  grupo_id: grupo.id,
+                }));
+              });
+            });
+            setHorarios(allHorarios);
           });
-        });
-        setHorarios(allHorarios);
       })
       .catch(error => console.error('Error fetching carreras:', error));
 
@@ -163,11 +214,9 @@ function Dashboard({ currentUser, onLogout }) {
         return response.json();
       })
       .then(data => {
-        let filteredData = data;
-        if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-          filteredData = data.filter(e => e.materia && e.materia.carrera_nombre === currentUser.carrera);
-        }
-        setExamenes(filteredData);
+        // Por ahora mostrar TODOS los exámenes
+        // TODO: El backend debe devolver solo los de la carrera del usuario
+        setExamenes(data);
       })
       .catch(error => console.error('Error fetching examenes:', error));
   };
@@ -346,8 +395,17 @@ function Dashboard({ currentUser, onLogout }) {
   });
 
   const filteredExamenes = examenes.filter(e => {
+    
+    // Para jefe_carrera, filtrar por carrera_id en lugar de carrera_nombre
     if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-      if (!e.materia || e.materia.carrera_nombre !== currentUser.carrera) return false;
+      if (!e.materia) {
+        return false;
+      }
+      
+      // Comparar con carrera_id usando selectedCarreraId si existe
+      if (selectedCarreraId && e.materia.carrera_id !== selectedCarreraId) {
+        return false;
+      }
     }
     const matchesCareer = !selectedCarreraName || (e.materia && e.materia.carrera_nombre === selectedCarreraName);
     let matchesGroup = true;
@@ -388,15 +446,23 @@ function Dashboard({ currentUser, onLogout }) {
     return null;
   };
 
+  // Las carreras ya vienen filtradas del endpoint carreras-filtradas
+  // No necesitamos filtrar nuevamente aquí
   let carrerasToShow = carreras;
-  if (currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-    carrerasToShow = carreras.filter(c => c.nombre === currentUser.carrera);
-  }
 
   const uniqueCarreras = [...new Set(carrerasToShow.map(c => ({ id: c.id, nombre: c.nombre })))];
-  const allUniqueGroups = [...new Set(carrerasToShow.flatMap(carrera => carrera.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo, carrera_id: carrera.id }))))];
-  const uniqueGrupos = selectedCarreraName
-    ? [...new Set(carrerasToShow.find(c => c.nombre === selectedCarreraName)?.grupos.map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo })) || [])]
+  
+  // Los grupos vienen del estado 'grupos' que se carga del endpoint grupos-filtrados
+  const allUniqueGroups = grupos.map(g => ({ 
+    id: g.id, 
+    nombre_grupo: g.nombre_grupo, 
+    carrera_id: g.carrera_id 
+  }));
+  
+  // Filtrar grupos por la carrera seleccionada
+  const carreraSeleccionadaId = carrerasToShow.find(c => c.nombre === selectedCarreraName)?.id;
+  const uniqueGrupos = carreraSeleccionadaId
+    ? grupos.filter(g => g.carrera_id === carreraSeleccionadaId).map(g => ({ id: g.id, nombre_grupo: g.nombre_grupo }))
     : [];
 
   return (
@@ -417,7 +483,7 @@ function Dashboard({ currentUser, onLogout }) {
             <div>
               <h1>{
                 activeView === 'Inicio' ? 'Bienvenido' :
-                  activeView === 'Calendario' ? 'Horario de Exámenes' :
+                  activeView === 'Calendario' ? 'Calendario de Exámenes' :
                     activeView === 'Horarios' ? 'Gestión de Horarios' :
                       activeView === 'Revisiones' ? 'Revisión (Servicios Escolares)' :
                         activeView === 'Rechazados' ? 'Exámenes Rechazados' :
@@ -520,7 +586,9 @@ function Dashboard({ currentUser, onLogout }) {
                     value={selectedCarreraName}
                     onChange={(e) => {
                       const name = e.target.value;
+                      const selectedCarreraObj = carreras.find(c => c.nombre === name);
                       setSelectedCarreraName(name);
+                      setSelectedCarreraId(selectedCarreraObj ? selectedCarreraObj.id : null);
                       setSelectedGrupoIdForExamenes(null);
                     }}
                   >
@@ -529,19 +597,20 @@ function Dashboard({ currentUser, onLogout }) {
                       <option key={career.id} value={career.nombre}>{career.nombre}</option>
                     ))}
                   </select>
-                  <select
-                    className="group-select"
-                    value={selectedGrupoIdForExamenes || ''}
-                    onChange={(e) => setSelectedGrupoIdForExamenes(e.target.value ? parseInt(e.target.value) : null)}
-                    disabled={!selectedCarreraName}
-                  >
-                    <option value="">Todos los Grupos</option>
-                    {allUniqueGroups
-                      .filter(group => !selectedCarreraName || group.carrera_id === selectedCarreraId)
-                      .map(group => (
-                        <option key={group.id} value={group.id}>{group.nombre_grupo}</option>
-                      ))}
-                  </select>
+                  {selectedCarreraName && (
+                    <select
+                      className="group-select"
+                      value={selectedGrupoIdForExamenes || ''}
+                      onChange={(e) => setSelectedGrupoIdForExamenes(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                      <option value="">Todos los Grupos</option>
+                      {allUniqueGroups
+                        .filter(group => group.carrera_id === selectedCarreraId)
+                        .map(group => (
+                          <option key={group.id} value={group.id}>{group.nombre_grupo}</option>
+                        ))}
+                    </select>
+                  )}
                   {currentUser && currentUser.role === 'jefe_carrera' && (
                     <button
                       className="plan-button"

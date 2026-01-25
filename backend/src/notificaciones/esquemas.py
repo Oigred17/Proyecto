@@ -19,4 +19,4 @@ class Notificacion(NotificacionBase):
     fecha_creacion: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

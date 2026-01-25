@@ -45,7 +45,21 @@ class Grupo(BaseModel):
 
 class Carrera(BaseModel):
     id: int
-    nombre: str
+    nombre: Optional[str] = None
     grupos: List[Grupo] = []
+    class Config:
+        from_attributes = True
+
+# Esquemas simplificados para combobox
+class CarreraSimple(BaseModel):
+    id: int
+    nombre: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class GrupoSimple(BaseModel):
+    id: int
+    nombre_grupo: str
+    carrera_id: int
     class Config:
         from_attributes = True

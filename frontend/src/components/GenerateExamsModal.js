@@ -9,6 +9,7 @@ import './GenerateExamsModal.css';
  * - Academia selection restored
  */
 function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_URL, showToast }) {
+  
   const [academias, setAcademias] = useState([]);
   const [profesores, setProfesores] = useState([]);
   const [groupsData, setGroupsData] = useState([]);
@@ -16,46 +17,82 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
   const [filterText, setFilterText] = useState('');
   const [tipoExamen, setTipoExamen] = useState('Parcial 1');
   const [modalidad, setModalidad] = useState('Escrito');
-  const [periodo, setPeriodo] = useState('2025-2');
+  const [periodo, setPeriodo] = useState('');
+  const [periodoNombre, setPeriodoNombre] = useState('Cargando...');
   const [isGenerating, setIsGenerating] = useState(false);
   const [genMessage, setGenMessage] = useState('Calculando horarios y evitando conflictos...');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch academic structure
-      const carreraRes = await fetch(`${API_URL}/carreras`);
-      const carrerasData = await carreraRes.json();
-      const currentCarrera = carrerasData.find(c => c.id === parseInt(carreraId));
+      // 0. Obtener periodo actual de la API
+      try {
+        const periodoRes = await fetch(`${API_URL}/horarios-externos/periodo/actual`);
+        if (periodoRes.ok) {
+          const periodoData = await periodoRes.json();
+          if (periodoData && periodoData.clave) {
+            setPeriodo(periodoData.clave);
+            setPeriodoNombre(periodoData.nombre || periodoData.clave);
+          }
+        }
+      } catch (err) {
+        console.warn('No se pudo obtener el periodo actual de la API:', err);
+      }
 
-      // 2. Fetch Academias and Profesores
-      const [academiasRes, profesoresRes, examenesRes] = await Promise.all([
+      // 1. Fetch grupos filtrados según rol del usuario
+      let gruposData = [];
+      
+      if (currentUser.role === 'servicios_escolares' || currentUser.role === 'administrador') {
+        // Servicios escolares ve grupos de la carrera seleccionada
+        const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=${currentUser.role}&carrera_seleccionada_id=${carreraId}`);
+        gruposData = await gruposRes.json();
+      } else if (currentUser.role === 'jefe_carrera') {
+        // Jefe de carrera solo ve grupos de su carrera
+        const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=jefe_carrera&clave_carrera=${currentUser.carrera}`);
+        gruposData = await gruposRes.json();
+      }
+
+      // 2. Fetch Academias, Profesores y Examenes
+      const [academiasRes, profesoresRes, examenesRes, carrerasRes] = await Promise.all([
         fetch(`${API_URL}/academias`),
         fetch(`${API_URL}/profesores`),
-        fetch(`${API_URL}/examenes`)
+        fetch(`${API_URL}/examenes`),
+        fetch(`${API_URL}/carreras`)
       ]);
 
       const acaData = await (academiasRes.ok ? academiasRes.json() : []);
       const profData = await (profesoresRes.ok ? profesoresRes.json() : []);
       const allExamenes = await (examenesRes.ok ? examenesRes.json() : []);
+      const carrerasData = await (carrerasRes.ok ? carrerasRes.json() : []);
 
       setAcademias(acaData);
       setProfesores(profData);
 
-      // 4. Process Groups from Horarios
-      // We want to show which materias are actually assigned to each group
-      if (!currentCarrera || !currentCarrera.grupos) {
+      // 3. Para cada grupo filtrado, obtener sus horarios
+      if (!gruposData || gruposData.length === 0) {
         setGroupsData([]);
         return;
       }
 
-      const processed = currentCarrera.grupos.map(grupo => {
+      // Encontrar la carrera actual para obtener horarios completos
+      const currentCarrera = carrerasData.find(c => c.id === parseInt(carreraId));
+      
+      if (!currentCarrera) {
+        setGroupsData([]);
+        setLoading(false);
+        return;
+      }
+      
+      const processed = gruposData.map(grupoSimple => {
+        // Buscar el grupo completo con horarios en la carrera
+        const grupoCompleto = currentCarrera?.grupos?.find(g => g.id === grupoSimple.id);
+        
         // Collect unique materias from schedules
         const materiasMap = {};
-        (grupo.horarios || []).forEach(h => {
+        (grupoCompleto?.horarios || []).forEach(h => {
           if (h.materia && !materiasMap[h.materia.id]) {
             // Check if there's an existing exam record to get sinodal info
-            const existing = allExamenes.find(e => e.materia_id === h.materia.id && e.grupo_id === grupo.id);
+            const existing = allExamenes.find(e => e.materia_id === h.materia.id && e.grupo_id === grupoSimple.id);
 
             materiasMap[h.materia.id] = {
               id: h.materia.id,
@@ -74,8 +111,8 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
         const materiasList = Object.values(materiasMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
 
         return {
-          id: grupo.id,
-          nombre: grupo.nombre_grupo,
+          id: grupoSimple.id,
+          nombre: grupoSimple.nombre_grupo,
           materias: materiasList,
           selected: materiasList.length > 0
         };
@@ -88,7 +125,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
     } finally {
       setLoading(false);
     }
-  }, [carreraId, API_URL]);
+  }, [carreraId, API_URL, currentUser]);
 
   useEffect(() => {
     fetchData();
@@ -269,13 +306,22 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
 
             <div className="control-field">
               <label className="field-label-premium">PERIODO</label>
-              <input
-                type="text"
-                className="gem-input-premium"
-                value={periodo}
-                onChange={e => setPeriodo(e.target.value)}
-                placeholder="Ej. 2025-2"
-              />
+              <div className="gem-input-premium" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                background: '#f8fafc',
+                color: '#475569',
+                fontWeight: '600'
+              }}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                {periodoNombre}
+              </div>
             </div>
 
             <div className="control-field">
