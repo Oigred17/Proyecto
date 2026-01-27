@@ -12,6 +12,8 @@ services:
       - DATABASE_URL=postgresql+psycopg2://proj_user:proj_pass@db:5432/proyecto_db
     depends_on:
       - db
+    extra_hosts:
+      - "serv-horarios.unsis.lan:132.18.41.238"
 
   frontend:
     build:
