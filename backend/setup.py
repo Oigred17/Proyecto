@@ -32,15 +32,31 @@ from src.integracion_horarios.core.config import settings as horarios_config
 logger = logging.getLogger(__name__)
 
 def obtener_o_crear(session, model, **kwargs):
-    """Obtiene una instancia existente o crea una nueva si no existe."""
-    instance = session.query(model).filter_by(**kwargs).first()
+    """Obtiene una instancia existente o crea una nueva si no existe, normalizando strings."""
+    # Normalizar valores de búsqueda si son strings (quitar espacios)
+    search_kwargs = {}
+    for k, v in kwargs.items():
+        if isinstance(v, str):
+            search_kwargs[k] = v.strip()
+        else:
+            search_kwargs[k] = v
+
+    instance = session.query(model).filter_by(**search_kwargs).first()
     if instance:
         return instance, False
     else:
-        instance = model(**kwargs)
-        session.add(instance)
-        session.flush()
-        return instance, True
+        try:
+            instance = model(**search_kwargs)
+            session.add(instance)
+            session.flush()
+            return instance, True
+        except Exception:
+            # En caso de error de concurrencia o flush, intentar buscar de nuevo
+            session.rollback()
+            instance = session.query(model).filter_by(**search_kwargs).first()
+            if instance:
+                return instance, False
+            raise
 
 def clean_db():
     """Elimina todas las tablas de la base de datos."""
@@ -105,7 +121,8 @@ def populate_from_api():
         from src.integracion_horarios.services.carrera_service import CarreraService
         carrera_service = CarreraService()
         carreras_api = carrera_service.obtener_todas_carreras()
-        carrera_map = {c['clave']: c['nombre'] for c in carreras_api if c.get('vigente', True)}
+        # Normalizar nombres de la API: strip y upper para consistencia
+        carrera_map = {c['clave']: c['nombre'].strip().upper() for c in carreras_api if c.get('vigente', True)}
         print(f"✓ Mapeadas {len(carrera_map)} carreras vigentes")
     except Exception as e:
         print(f"⚠️  No se pudieron obtener carreras de API: {e}")
@@ -118,6 +135,8 @@ def populate_from_api():
         '13': 'INGLÉS',
         '12': 'INGLÉS',
     }
+    # Asegurar que el mapa adicional también esté normalizado
+    carrera_map_adicional = {k: v.strip().upper() for k, v in carrera_map_adicional.items()}
     carrera_map.update(carrera_map_adicional)
     
     try:
@@ -144,107 +163,101 @@ def populate_from_api():
         
         print(f"✓ Se obtuvieron {len(grupos_data)} grupos de la API")
         
-        # Obtener horarios por cada grupo
+        # Procesar grupos uno por uno
+        db = SessionLocal()
+        dias_map_inv = {1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo"}
+        
         horario_service = HorarioService()
-        all_horarios = []
-        print(f"🔍 Consultando horarios para {len(grupos_data)} grupos...")
+        print(f"🔍 Procesando {len(grupos_data)} grupos y sus horarios...")
+        
         for i, grupo_info in enumerate(grupos_data):
             try:
+                # 1. Información del grupo
                 clave_grupo = grupo_info.get('clave')
-                if clave_grupo:
-                    horarios_grupo = horario_service.obtener_por_grupo(periodo=periodo_actual, idGrupo=clave_grupo)
-                    if horarios_grupo:
-                        all_horarios.extend(horarios_grupo)
-                        if i < 3:  # Solo mostrar los primeros 3 para no saturar
-                            print(f"  ✓ Grupo {clave_grupo}: {len(horarios_grupo)} horarios")
+                clave_carrera = grupo_info.get('carrera')
+                semestre = grupo_info.get('semestre')
+                
+                if not clave_grupo or not clave_carrera:
+                    continue
+                
+                # 2. Carrera (del grupo)
+                carrera_nombre = carrera_map.get(clave_carrera, str(clave_carrera).strip().upper())
+                carrera_obj, _ = obtener_o_crear(db, Carrera, nombre=carrera_nombre)
+                
+                # 3. Grupo (con su semestre y carrera)
+                grupo_obj, _ = obtener_o_crear(db, Grupo, 
+                    nombre_grupo=clave_grupo.strip().upper(), 
+                    carrera_id=carrera_obj.id,
+                    semestre=semestre
+                )
+                
+                # 4. Obtener horarios de este grupo
+                horarios_grupo = horario_service.obtener_por_grupo(periodo=periodo_actual, idGrupo=clave_grupo)
+                if not horarios_grupo:
+                    continue
+                    
+                for item in horarios_grupo:
+                    # Profesor
+                    prof_nombre = item.get("nombreCompleto", "SIN PROFESOR").strip().upper()
+                    if prof_nombre in ["SIN PROFESOR ASIGNADO", "", "SIN PROFESOR"]:
+                        prof_obj = None
+                    else:
+                        prof_obj, _ = obtener_o_crear(db, Profesor, nombre=prof_nombre)
+
+                    # Aula
+                    aula_nombre = item.get("nombreAula", "SIN AULA").strip().upper()
+                    if not aula_nombre:
+                        aula_nombre = "SIN AULA"
+                    aula_obj, _ = obtener_o_crear(db, Aula, nombre=aula_nombre)
+
+                    # Materia (SIEMPRE asociada a la carrera de la licenciatura del grupo)
+                    m_raw = item.get("materia", "").strip()
+                    if not m_raw:
+                        continue
+                        
+                    m_upper = m_raw.upper()
+                    ignorar = ['BIBLIOTECA', 'TUTORÍA', 'ASESORÍA', 'EXTRAESCOLARES', 'SALA DE CÓMPUTO', 'SALA DE COMPUTO']
+                    if any(x == m_upper for x in ignorar):
+                        continue
+
+                    # Crear materia ligada a la carrera del grupo
+                    if prof_obj:
+                        materia_obj, _ = obtener_o_crear(db, Materia, nombre=m_raw, carrera_id=carrera_obj.id, profesor_id=prof_obj.id)
+                    else:
+                        materia_obj, _ = obtener_o_crear(db, Materia, nombre=m_raw, carrera_id=carrera_obj.id)
+
+                    # Horario
+                    dia_num = item.get("dia", 1)
+                    dia_nombre = dias_map_inv.get(dia_num, "Lunes")
+                    hora_num = item.get("hora", 8)
+                    t_start = datetime.time(hour=hora_num, minute=0)
+                    t_end = datetime.time(hour=(hora_num + 1), minute=0)
+
+                    horario_exists = db.query(Horario).filter_by(
+                        dia_semana=dia_nombre, hora_inicio=t_start, grupo_id=grupo_obj.id, materia_id=materia_obj.id
+                    ).first()
+                    
+                    if not horario_exists:
+                        db.add(Horario(
+                            dia_semana=dia_nombre, hora_inicio=t_start, hora_fin=t_end,
+                            grupo_id=grupo_obj.id, materia_id=materia_obj.id,
+                            aula_id=aula_obj.id
+                        ))
+                
+                # Commit cada cierto número de grupos para no saturar memoria
+                if i % 10 == 0:
+                    db.commit()
+                    if i < 3 or i % 50 == 0:
+                        print(f"  ✓ Procesados {i} grupos...")
+
             except Exception as e:
-                if i < 3:
-                    print(f"  ⚠ Error en grupo {clave_grupo}: {str(e)[:50]}")
-                # Continuar con el siguiente grupo si falla uno
+                print(f"  ⚠ Error en grupo {clave_grupo}: {e}")
+                db.rollback()
                 continue
         
-        if i >= 3:
-            print(f"  ... (consultados {len(grupos_data)} grupos en total)")
-        
-        if not all_horarios or len(all_horarios) == 0:
-            print("⚠️  No se obtuvieron horarios de la API")
-            print("🔄 Cargando desde JSON local...")
-            return populate_from_json()
-        
-        print(f"✓ Se obtuvieron {len(all_horarios)} registros de horarios de la API")
-        data = all_horarios
-        
-    except Exception as e:
-        print(f"✗ Error al consultar la API externa: {e}")
-        print("🔄 Intentando cargar desde JSON local como respaldo...")
-        return populate_from_json()
-
-    # Procesar los datos obtenidos de la API
-    db = SessionLocal()
-    try:
-        dias_map_inv = {1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo"}
-
-        for item in data:
-            # Obtener clave de carrera del item
-            carrera_clave = item.get("carrera", "")
-            # Usar el mapeo para obtener el nombre completo
-            carrera_nombre = carrera_map.get(carrera_clave, carrera_clave)
-            if not carrera_nombre:
-                carrera_nombre = "Carrera Desconocida"
-            
-            carrera_obj, _ = obtener_o_crear(db, Carrera, nombre=carrera_nombre)
-            
-            grupo_nombre = item.get("nombreGrupo", "Grupo X")
-            grupo_obj, _ = obtener_o_crear(db, Grupo, nombre_grupo=grupo_nombre, carrera_id=carrera_obj.id)
-            
-            prof_nombre = item.get("nombreCompleto", "SIN PROFESOR").strip()
-            if prof_nombre == "SIN PROFESOR ASIGNADO" or not prof_nombre:
-                prof_obj = None
-            else:
-                prof_obj, _ = obtener_o_crear(db, Profesor, nombre=prof_nombre)
-
-            aula_nombre = item.get("nombreAula", "Sin Aula").strip()
-            if not aula_nombre:
-                aula_nombre = "Sin Aula"
-            aula_obj, _ = obtener_o_crear(db, Aula, nombre=aula_nombre)
-
-            m_raw = item.get("materia", "").strip()
-            m_upper = m_raw.upper()
-
-            ignorar = ['BIBLIOTECA', 'TUTORÍA', 'ASESORÍA', 'EXTRAESCOLARES', 'SALA DE CÓMPUTO', 'SALA DE COMPUTO']
-
-            if any(x == m_upper for x in ignorar):
-                continue
-
-            if not m_raw or m_raw == "":
-                continue
-
-            # Si hay profesor, incluirlo en la búsqueda/creación de la materia
-            if prof_obj:
-                materia_obj, _ = obtener_o_crear(db, Materia, nombre=m_raw, carrera_id=carrera_obj.id, profesor_id=prof_obj.id)
-            else:
-                materia_obj, _ = obtener_o_crear(db, Materia, nombre=m_raw, carrera_id=carrera_obj.id)
-
-            dia_num = item.get("dia", 1)
-            dia_nombre = dias_map_inv.get(dia_num, "Lunes")
-
-            hora_num = item.get("hora", 8)
-            t_start = datetime.time(hour=hora_num, minute=0)
-            t_end = datetime.time(hour=(hora_num + 1), minute=0)
-
-            horario_exists = db.query(Horario).filter_by(
-                dia_semana=dia_nombre, hora_inicio=t_start, grupo_id=grupo_obj.id, materia_id=materia_obj.id
-            ).first()
-            
-            if not horario_exists:
-                db.add(Horario(
-                    dia_semana=dia_nombre, hora_inicio=t_start, hora_fin=t_end,
-                    grupo_id=grupo_obj.id, materia_id=materia_obj.id,
-                    aula_id=aula_obj.id
-                ))
-
         db.commit()
-        print("✓ Datos poblados exitosamente desde API externa")
+        print(f"✓ Datos de {len(grupos_data)} grupos poblados exitosamente desde API")
+        return # Terminar aquí, ya no procesamos el bloque de abajo
     except Exception as e:
         print(f"✗ Error al poblar desde API: {e}")
         db.rollback()

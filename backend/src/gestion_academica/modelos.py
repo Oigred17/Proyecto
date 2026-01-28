@@ -59,6 +59,7 @@ class Grupo(Base):
     __tablename__ = 'grupos'
     id = Column(Integer, primary_key=True, index=True)
     nombre_grupo = Column(String)
+    semestre = Column(Integer, nullable=True)
     carrera_id = Column(Integer, ForeignKey('carreras.id'))
 
     carrera = relationship("Carrera", back_populates="grupos")
