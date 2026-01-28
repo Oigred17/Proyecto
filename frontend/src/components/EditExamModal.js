@@ -12,7 +12,35 @@ function EditExamModal({ exam, aulas, profesores, onClose, onSave }) {
         tipo: exam.tipo
     });
 
+    const [aulasDisponibilidad, setAulasDisponibilidad] = useState([]);
+    const [loadingAulas, setLoadingAulas] = useState(false);
+
     const duration = form.tipo?.toLowerCase().includes('ordinario') ? 2 : 1;
+
+    // Obtener disponibilidad de aulas cuando cambian fecha u hora
+    useEffect(() => {
+        const fetchDisponibilidad = async () => {
+            if (!form.fecha || !form.hora_inicio || !form.hora_fin) return;
+            
+            setLoadingAulas(true);
+            try {
+                const horaInicio = form.hora_inicio.slice(0, 5);
+                const horaFin = form.hora_fin.slice(0, 5);
+                const response = await fetch(
+                    `/api/aulas/disponibilidad?fecha=${form.fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}&examen_id=${exam.id}`
+                );
+                const data = await response.json();
+                setAulasDisponibilidad(data);
+            } catch (error) {
+                console.error('Error al obtener disponibilidad de aulas:', error);
+                setAulasDisponibilidad([]);
+            } finally {
+                setLoadingAulas(false);
+            }
+        };
+
+        fetchDisponibilidad();
+    }, [form.fecha, form.hora_inicio, form.hora_fin, exam.id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,6 +56,11 @@ function EditExamModal({ exam, aulas, profesores, onClose, onSave }) {
         }
 
         setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Obtener info de disponibilidad para un aula específica
+    const getAulaInfo = (aulaId) => {
+        return aulasDisponibilidad.find(a => a.id === aulaId);
     };
 
     return (
@@ -87,13 +120,43 @@ function EditExamModal({ exam, aulas, profesores, onClose, onSave }) {
                         <div className="eem-section">
                             <h4 className="eem-section-title">Logística</h4>
                             <div className="eem-field">
-                                <label>Aula Asignada</label>
-                                <select name="aula_id" value={form.aula_id} onChange={handleChange} className="eem-select">
+                                <label>Aula Asignada {loadingAulas && <span className="eem-loading-badge">Verificando...</span>}</label>
+                                <select 
+                                    name="aula_id" 
+                                    value={form.aula_id} 
+                                    onChange={handleChange} 
+                                    className="eem-select eem-select-aulas"
+                                >
                                     <option value="">Sin Aula</option>
-                                    {aulas.map(a => (
-                                        <option key={a.id} value={a.id}>{a.nombre}</option>
-                                    ))}
+                                    {aulas.map(a => {
+                                        const info = getAulaInfo(a.id);
+                                        const ocupada = info?.ocupada;
+                                        const capacidadTexto = info?.capacidad ? ` (Cap: ${info.capacidad})` : '';
+                                        const icon = ocupada ? '🔴' : '🟢';
+                                        return (
+                                            <option 
+                                                key={a.id} 
+                                                value={a.id}
+                                                className={ocupada ? 'aula-ocupada' : 'aula-libre'}
+                                                title={ocupada ? info.motivo : 'Aula disponible'}
+                                            >
+                                                {icon} {a.nombre}{capacidadTexto} {ocupada ? '- OCUPADA' : ''}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
+                                {form.aula_id && getAulaInfo(Number(form.aula_id))?.ocupada && (
+                                    <div className="eem-warning-box">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                        </svg>
+                                        <div>
+                                            <strong>Advertencia:</strong> {getAulaInfo(Number(form.aula_id))?.motivo}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="eem-field">
                                 <label>Docente Aplicador</label>

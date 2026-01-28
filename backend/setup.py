@@ -115,7 +115,39 @@ def populate_from_api():
     """Pobla la base de datos con los horarios desde la API externa."""
     print(f"📡 Consultando API externa: {horarios_config.API_HORARIOS}")
     
-    # Obtener carreras de la API para crear mapeo clave -> nombre
+    db = SessionLocal()
+    
+    # 1. PRIMERO: Cargar todas las aulas con sus atributos completos desde la API
+    try:
+        print("🏢 Cargando catálogo de aulas desde API...")
+        from src.integracion_horarios.services.aula_service import AulaService
+        aula_service = AulaService()
+        aulas_api = aula_service.obtener_todas_aulas(page=1, size=500)
+        
+        aulas_creadas = 0
+        for aula_data in aulas_api:
+            nombre_aula = aula_data.get('nombre', '').strip().upper()
+            if nombre_aula:
+                aula_existente = db.query(Aula).filter_by(nombre=nombre_aula).first()
+                if not aula_existente:
+                    db.add(Aula(
+                        nombre=nombre_aula,
+                        capacidad=aula_data.get('capacidad'),
+                        tipo=aula_data.get('tipo')
+                    ))
+                    aulas_creadas += 1
+                elif aula_existente.capacidad is None:
+                    # Actualizar aulas existentes sin capacidad
+                    aula_existente.capacidad = aula_data.get('capacidad')
+                    aula_existente.tipo = aula_data.get('tipo')
+        
+        db.commit()
+        print(f"✓ Cargadas {aulas_creadas} aulas nuevas con sus atributos completos")
+    except Exception as e:
+        print(f"⚠️  Error al cargar aulas: {e}")
+        db.rollback()
+    
+    # 2. Obtener carreras de la API para crear mapeo clave -> nombre
     carrera_map = {}
     try:
         from src.integracion_horarios.services.carrera_service import CarreraService
@@ -204,11 +236,17 @@ def populate_from_api():
                     else:
                         prof_obj, _ = obtener_o_crear(db, Profesor, nombre=prof_nombre)
 
-                    # Aula
+                    # Aula - buscar en las ya creadas, si no existe crear con nombre básico
                     aula_nombre = item.get("nombreAula", "SIN AULA").strip().upper()
                     if not aula_nombre:
                         aula_nombre = "SIN AULA"
-                    aula_obj, _ = obtener_o_crear(db, Aula, nombre=aula_nombre)
+                    
+                    aula_obj = db.query(Aula).filter_by(nombre=aula_nombre).first()
+                    if not aula_obj:
+                        # Si no existe, crear una básica (no debería pasar si cargamos primero el catálogo)
+                        aula_obj = Aula(nombre=aula_nombre)
+                        db.add(aula_obj)
+                        db.flush()
 
                     # Materia (SIEMPRE asociada a la carrera de la licenciatura del grupo)
                     m_raw = item.get("materia", "").strip()

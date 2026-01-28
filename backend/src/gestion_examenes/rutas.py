@@ -1019,3 +1019,89 @@ def revision_grupo(datos: RevisionRequest, db: Session = Depends(obtener_db)):
     db.commit()
     
     return {"message": f"Exámenes {nuevo_status}s para {count_grupos} grupo(s)."}
+
+
+@router.get("/aulas/disponibilidad")
+def obtener_aulas_con_disponibilidad(
+    fecha: date,
+    hora_inicio: str,
+    hora_fin: str,
+    examen_id: Optional[int] = None,
+    db: Session = Depends(obtener_db)
+):
+    """
+    Obtiene todas las aulas con su estado de disponibilidad para una fecha y hora específicas.
+    Útil para el combobox de selección de aulas al modificar exámenes.
+    
+    - **fecha**: Fecha del examen (formato YYYY-MM-DD)
+    - **hora_inicio**: Hora de inicio (formato HH:MM)
+    - **hora_fin**: Hora de fin (formato HH:MM)
+    - **examen_id**: ID del examen actual (para excluirlo de conflictos)
+    
+    Retorna lista de aulas con:
+    - id, nombre, capacidad, tipo
+    - ocupada: true/false
+    - motivo: razón por la que está ocupada (si aplica)
+    """
+    from datetime import datetime as dt
+    
+    # Convertir strings de hora a objetos time
+    h_inicio = dt.strptime(hora_inicio, "%H:%M").time()
+    h_fin = dt.strptime(hora_fin, "%H:%M").time()
+    
+    # Obtener todas las aulas
+    aulas = db.query(modelos_academica.Aula).order_by(modelos_academica.Aula.nombre).all()
+    
+    # Mapear día de la semana
+    dias_map = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'}
+    dia_semana = dias_map[fecha.weekday()]
+    
+    resultado = []
+    
+    for aula in aulas:
+        disponible = True
+        motivo = None
+        
+        # Verificar conflictos con otros exámenes
+        examenes_conflicto = db.query(modelos_examenes.Examen).filter(
+            modelos_examenes.Examen.aula_id == aula.id,
+            modelos_examenes.Examen.fecha == fecha,
+            modelos_examenes.Examen.id != examen_id if examen_id else True
+        ).all()
+        
+        for ex in examenes_conflicto:
+            # Verificar solapamiento de horarios
+            if (h_inicio < ex.hora_fin) and (h_fin > ex.hora_inicio):
+                disponible = False
+                materia_nombre = ex.materia.nombre if ex.materia else "Desconocida"
+                motivo = f"Examen de {materia_nombre} ({ex.hora_inicio.strftime('%H:%M')}-{ex.hora_fin.strftime('%H:%M')})"
+                break
+        
+        # Si no hay conflicto con exámenes, verificar horarios de clases regulares
+        if disponible:
+            horarios_conflicto = db.query(modelos_horarios.Horario).filter(
+                modelos_horarios.Horario.aula_id == aula.id,
+                modelos_horarios.Horario.dia_semana == dia_semana
+            ).options(
+                joinedload(modelos_horarios.Horario.materia),
+                joinedload(modelos_horarios.Horario.grupo)
+            ).all()
+            
+            for horario in horarios_conflicto:
+                if (h_inicio < horario.hora_fin) and (h_fin > horario.hora_inicio):
+                    disponible = False
+                    materia_nombre = horario.materia.nombre if horario.materia else "Clase"
+                    grupo_nombre = horario.grupo.nombre_grupo if horario.grupo else ""
+                    motivo = f"Clase de {materia_nombre} - Grupo {grupo_nombre} ({horario.hora_inicio.strftime('%H:%M')}-{horario.hora_fin.strftime('%H:%M')})"
+                    break
+        
+        resultado.append({
+            "id": aula.id,
+            "nombre": aula.nombre,
+            "capacidad": aula.capacidad,
+            "tipo": aula.tipo,
+            "ocupada": not disponible,
+            "motivo": motivo
+        })
+    
+    return resultado
