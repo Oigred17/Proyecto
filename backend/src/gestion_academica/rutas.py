@@ -94,7 +94,8 @@ def get_carreras_filtradas(rol: str, clave_carrera: str = None, db: Session = De
     """
     Obtiene carreras filtradas según el rol del usuario.
     - servicios_escolares: devuelve TODAS las carreras
-    - jefe_carrera: devuelve solo la carrera del jefe (requiere clave_carrera)
+    - jefe_carrera: devuelve todas las carreras que compartan el mismo número base
+                    (ej: 06B incluye 06 y 06B, 04B incluye 04 y 04B)
     """
     if rol == "servicios_escolares" or rol == "administrador":
         # Devolver todas las carreras
@@ -103,19 +104,40 @@ def get_carreras_filtradas(rol: str, clave_carrera: str = None, db: Session = De
     elif rol == "jefe_carrera":
         if not clave_carrera:
             raise HTTPException(status_code=400, detail="Se requiere clave_carrera para rol jefe_carrera")
-        # Devolver solo la carrera del jefe (necesitamos mapear de clave a nombre)
-        from ..integracion_horarios.servicios.carrera_service import CarreraService
+        
+        # Extraer el número base de la clave (sin letras)
+        import re
+        numero_base = re.match(r'^(\d+)', clave_carrera)
+        if not numero_base:
+            raise HTTPException(status_code=400, detail="Formato de clave_carrera inválido")
+        
+        numero_base = numero_base.group(1)
+        logger.info(f"Buscando carreras con número base: {numero_base}")
+        
+        # Devolver TODAS las carreras que empiecen con ese número base
+        from ..integracion_horarios.services.carrera_service import CarreraService
         try:
             carrera_service = CarreraService()
+            # Obtener carreras vigentes
             carreras_api = carrera_service.obtener_todas_carreras()
-            carrera_map = {c['clave']: c['nombre'] for c in carreras_api if c.get('vigente', True)}
-            nombre_carrera = carrera_map.get(clave_carrera)
-            if nombre_carrera:
-                carrera = db.query(modelos.Carrera).filter(modelos.Carrera.nombre == nombre_carrera).first()
-                if carrera:
-                    return [carrera]
-        except:
-            pass
+            
+            # Filtrar carreras cuya clave empiece con el número base
+            nombres_carreras = [
+                c['nombre'] for c in carreras_api 
+                if c['clave'].startswith(numero_base)
+            ]
+            
+            logger.info(f"Carreras encontradas para número base {numero_base}: {nombres_carreras}")
+            
+            if nombres_carreras:
+                # Obtener todas las carreras de la BD que coincidan
+                carreras = db.query(modelos.Carrera).filter(
+                    modelos.Carrera.nombre.in_(nombres_carreras)
+                ).all()
+                logger.info(f"Total carreras en BD: {len(carreras)}")
+                return carreras
+        except Exception as e:
+            logger.error(f"Error al obtener carreras filtradas: {e}", exc_info=True)
         return []
     else:
         return []
@@ -131,7 +153,7 @@ def get_grupos_filtrados(
     Obtiene grupos filtrados según el rol del usuario y la carrera seleccionada.
     - servicios_escolares SIN carrera seleccionada: devuelve TODOS los grupos
     - servicios_escolares CON carrera seleccionada: devuelve grupos de esa carrera
-    - jefe_carrera: devuelve solo grupos de su carrera
+    - jefe_carrera: devuelve grupos de todas sus carreras O de la carrera seleccionada si se especifica
     """
     logger.info(f"get_grupos_filtrados - rol: {rol}, clave_carrera: {clave_carrera}, carrera_seleccionada_id: {carrera_seleccionada_id}")
     
@@ -154,30 +176,58 @@ def get_grupos_filtrados(
             raise HTTPException(status_code=400, detail="Se requiere clave_carrera para rol jefe_carrera")
         
         logger.info(f"Buscando grupos para jefe_carrera con clave: {clave_carrera}")
-        # Obtener nombre de carrera desde clave
-        from ..integracion_horarios.servicios.carrera_service import CarreraService
+        
+        # Si hay una carrera seleccionada, filtrar solo por esa
+        if carrera_seleccionada_id:
+            logger.info(f"Filtrando grupos por carrera seleccionada: {carrera_seleccionada_id}")
+            grupos = db.query(modelos.Grupo).filter(
+                modelos.Grupo.carrera_id == carrera_seleccionada_id
+            ).all()
+            logger.info(f"Grupos encontrados: {len(grupos)}")
+            return grupos
+        
+        # Si NO hay carrera seleccionada, devolver grupos de TODAS las carreras del jefe
+        from ..integracion_horarios.services.carrera_service import CarreraService
         try:
             carrera_service = CarreraService()
+            # Obtener carreras vigentes
             carreras_api = carrera_service.obtener_todas_carreras()
-            carrera_map = {c['clave']: c['nombre'] for c in carreras_api if c.get('vigente', True)}
-            logger.info(f"Mapeo de carreras: {list(carrera_map.keys())}")
             
-            nombre_carrera = carrera_map.get(clave_carrera)
-            logger.info(f"Nombre de carrera para clave {clave_carrera}: {nombre_carrera}")
+            # Extraer el número base de la clave (sin letras)
+            import re
+            numero_base = re.match(r'^(\d+)', clave_carrera)
+            if not numero_base:
+                logger.error(f"Formato de clave_carrera inválido: {clave_carrera}")
+                return []
             
-            if nombre_carrera:
-                carrera = db.query(modelos.Carrera).filter(modelos.Carrera.nombre == nombre_carrera).first()
-                if carrera:
-                    logger.info(f"Carrera encontrada en BD: id={carrera.id}, nombre={carrera.nombre}")
-                    grupos = db.query(modelos.Grupo).filter(
-                        modelos.Grupo.carrera_id == carrera.id
-                    ).all()
-                    logger.info(f"Grupos encontrados: {len(grupos)}")
-                    return grupos
-                else:
-                    logger.warning(f"Carrera no encontrada en BD: {nombre_carrera}")
+            numero_base = numero_base.group(1)
+            logger.info(f"Buscando carreras con número base: {numero_base}")
+            
+            # Filtrar carreras cuya clave empiece con el número base
+            nombres_carreras = [
+                c['nombre'] for c in carreras_api 
+                if c['clave'].startswith(numero_base)
+            ]
+            
+            logger.info(f"Carreras encontradas para número base {numero_base}: {nombres_carreras}")
+            
+            if nombres_carreras:
+                # Obtener IDs de todas las carreras
+                carreras = db.query(modelos.Carrera).filter(
+                    modelos.Carrera.nombre.in_(nombres_carreras)
+                ).all()
+                carrera_ids = [c.id for c in carreras]
+                
+                logger.info(f"IDs de carreras: {carrera_ids}")
+                
+                # Obtener grupos de todas esas carreras
+                grupos = db.query(modelos.Grupo).filter(
+                    modelos.Grupo.carrera_id.in_(carrera_ids)
+                ).all()
+                logger.info(f"Grupos encontrados: {len(grupos)}")
+                return grupos
             else:
-                logger.warning(f"Clave no encontrada en mapeo: {clave_carrera}")
+                logger.warning(f"No se encontraron carreras para número base: {numero_base}")
         except Exception as e:
             logger.error(f"Error al obtener grupos para jefe_carrera: {e}", exc_info=True)
         return []

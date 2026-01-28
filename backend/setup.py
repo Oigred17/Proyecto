@@ -13,8 +13,8 @@ from sqlalchemy import inspect, text
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configurar logging - Solo mostrar WARNING y superiores para limpiar la consola
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 from src.configuracion.base_datos import engine, SessionLocal
 from src.compartido.modelos_base import Base

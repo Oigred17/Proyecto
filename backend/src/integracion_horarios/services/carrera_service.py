@@ -7,7 +7,7 @@ class CarreraSchema(BaseModel):
     """Schema para validar datos de carreras de la API externa."""
     clave: str
     nombre: str
-    vigente: bool
+    vigente: bool = True  # Opcional, por defecto True
 
 class CarreraService(BaseSyncService):
     """Servicio para obtener carreras de la API externa."""
@@ -15,7 +15,7 @@ class CarreraService(BaseSyncService):
     def __init__(self):
         super().__init__(
             base_url=settings.API_HORARIOS,
-            endpoint_path="/carreras",
+            endpoint_path="/carreras/vigentes",
             schema=CarreraSchema
         )
     
@@ -27,7 +27,10 @@ class CarreraService(BaseSyncService):
     
     def obtener_todas_carreras(self):
         """
-        Obtiene todas las carreras.
-        Endpoint: GET /carreras
+        Obtiene todas las carreras vigentes.
+        Endpoint: GET /carreras/vigentes
+        
+        Este endpoint ya devuelve solo las carreras marcadas como vigentes,
+        por lo que no es necesario filtrar.
         """
         return self.obtener_datos_en_vivo()

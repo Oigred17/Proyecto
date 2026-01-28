@@ -79,7 +79,10 @@ def obtener_periodo_actual():
 # ==================== CARRERAS ====================
 @router.get("/carreras", response_model=List[CarreraExterna])
 def obtener_carreras():
-    """Obtiene todas las carreras vigentes de la API externa."""
+    """
+    Obtiene las carreras vigentes de la API externa.
+    Usa el endpoint /carreras/vigentes que ya filtra las carreras activas.
+    """
     try:
         service = CarreraService()
         return service.obtener_todas_carreras()

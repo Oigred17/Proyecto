@@ -17,17 +17,17 @@ function ExamFiles({ currentUser, API_URL, showToast }) {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const cRes = await fetch(`${API_URL}/carreras`);
+            // Usar endpoint filtrado según rol
+            let carrerasUrl = `${API_URL}/carreras-filtradas?rol=${currentUser.role}`;
+            if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+                carrerasUrl += `&clave_carrera=${currentUser.carrera}`;
+            }
+            
+            const cRes = await fetch(carrerasUrl);
             const cData = await cRes.json();
 
-            let filteredCarreras = cData;
-            if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-                filteredCarreras = cData.filter(c => c.nombre === currentUser.carrera);
-                if (filteredCarreras.length > 0) {
-                    setSelectedCarreraId(filteredCarreras[0].id);
-                }
-            }
-            setCarreras(filteredCarreras);
+            // Para jefe_carrera, NO auto-seleccionar para permitir elegir entre planes
+            setCarreras(cData);
 
             const eRes = await fetch(`${API_URL}/examenes`);
             const eData = await eRes.json();
@@ -87,18 +87,16 @@ function ExamFiles({ currentUser, API_URL, showToast }) {
     return (
         <div className="exam-files">
             <div className="files-controls">
-                {(currentUser.role === 'administrador' || currentUser.role === 'servicios_escolares') && (
-                    <select
-                        value={selectedCarreraId}
-                        onChange={(e) => setSelectedCarreraId(e.target.value)}
-                        className="career-select"
-                    >
-                        <option value="">Seleccione Carrera</option>
-                        {carreras.map(c => (
-                            <option key={c.id} value={c.id}>{c.nombre}</option>
-                        ))}
-                    </select>
-                )}
+                <select
+                    value={selectedCarreraId}
+                    onChange={(e) => setSelectedCarreraId(e.target.value)}
+                    className="career-select"
+                >
+                    <option value="">Seleccione Carrera</option>
+                    {carreras.map(c => (
+                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                </select>
 
                 <div className="report-settings" style={{ display: 'flex', gap: '10px' }}>
                     <input

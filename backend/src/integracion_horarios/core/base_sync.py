@@ -42,7 +42,7 @@ class BaseSyncService:
             formatted_path = self.endpoint_path.format(**path_params)
             full_url = f"{self.base_url}/{formatted_path.lstrip('/')}"
             
-            logger.info(f"Consultando: {full_url} | Query: {query_params}")
+            logger.debug(f"Consultando: {full_url} | Query: {query_params}")
 
             response = requests.get(
                 full_url, 

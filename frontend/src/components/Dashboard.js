@@ -126,16 +126,16 @@ function Dashboard({ currentUser, onLogout }) {
           return;
         }
         
-        // Para jefe_carrera, auto-seleccionar su carrera
-        if (currentUser && currentUser.role === 'jefe_carrera' && data.length > 0) {
-          const carrera = data[0];
-          setSelectedCarreraName(carrera.nombre);
-          setSelectedCarreraId(carrera.id);
-        }
+        // Para jefe_carrera, NO auto-seleccionar para permitir elegir entre planes (06, 06B)
+        // if (currentUser && currentUser.role === 'jefe_carrera' && data.length > 0) {
+        //   const carrera = data[0];
+        //   setSelectedCarreraName(carrera.nombre);
+        //   setSelectedCarreraId(carrera.id);
+        // }
         
         setCarreras(data);
         
-        // Obtener grupos filtrados
+        // Obtener grupos filtrados (sin carrera_seleccionada_id aún)
         let gruposUrl = `${API_URL}/grupos-filtrados?rol=${currentUser.role}`;
         if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
           gruposUrl += `&clave_carrera=${currentUser.carrera}`;
@@ -222,32 +222,27 @@ function Dashboard({ currentUser, onLogout }) {
   };
 
   const handleGenerateExams = () => {
-    let carreraIdToUse = selectedCarreraId;
-    if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-      const carrera = carreras.find(c => c.nombre === currentUser.carrera);
-      carreraIdToUse = carrera?.id;
-    }
-    if (!carreraIdToUse) {
-      alert('Por favor selecciona una carrera');
-      return;
-    }
-    if (!selectedCarreraId && carreraIdToUse) {
-      const carrera = carreras.find(c => c.id === carreraIdToUse);
-      if (carrera) {
-        setSelectedCarreraId(carreraIdToUse);
-        setSelectedCarreraName(carrera.nombre);
+    // Para jefe_carrera, asegurarse de que haya una carrera seleccionada
+    if (currentUser && currentUser.role === 'jefe_carrera') {
+      if (!selectedCarreraId) {
+        alert('Por favor selecciona una carrera primero');
+        return;
+      }
+    } else {
+      // Para admin/servicios escolares, usar la carrera seleccionada o pedir que seleccionen
+      if (!selectedCarreraId) {
+        alert('Por favor selecciona una carrera');
+        return;
       }
     }
+    
     setShowGenerateModal(true);
   };
 
   const handleGenerateFromModal = async (selectionData) => {
     try {
-      let carreraIdToUse = selectedCarreraId;
-      if (!carreraIdToUse && currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera) {
-        const carrera = carreras.find(c => c.nombre === currentUser.carrera);
-        carreraIdToUse = carrera?.id;
-      }
+      // Usar la carrera seleccionada (ya validada en handleGenerateExams)
+      const carreraIdToUse = selectedCarreraId;
 
       const response = await fetch(`${API_URL}/generar-examenes?carrera_id=${carreraIdToUse}`, {
         method: 'POST',
@@ -450,7 +445,19 @@ function Dashboard({ currentUser, onLogout }) {
   // No necesitamos filtrar nuevamente aquí
   let carrerasToShow = carreras;
 
-  const uniqueCarreras = [...new Set(carrerasToShow.map(c => ({ id: c.id, nombre: c.nombre })))];
+  // Eliminar duplicados usando un Map para comparar por id
+  const uniqueCarrerasMap = new Map();
+  carrerasToShow.forEach(c => {
+    if (!uniqueCarrerasMap.has(c.id)) {
+      uniqueCarrerasMap.set(c.id, { id: c.id, nombre: c.nombre });
+    }
+  });
+  const uniqueCarreras = Array.from(uniqueCarrerasMap.values());
+  
+  // DEBUG: Verificar carreras disponibles
+  console.log('DEBUG - uniqueCarreras:', uniqueCarreras);
+  console.log('DEBUG - selectedCarreraName:', selectedCarreraName);
+  console.log('DEBUG - currentUser:', currentUser);
   
   // Los grupos vienen del estado 'grupos' que se carga del endpoint grupos-filtrados
   const allUniqueGroups = grupos.map(g => ({ 
@@ -501,14 +508,30 @@ function Dashboard({ currentUser, onLogout }) {
                   className="career-select"
                   value={selectedCarreraName}
                   onChange={(e) => {
+                    console.log('DEBUG - onChange triggered, value:', e.target.value);
                     const name = e.target.value;
                     setSelectedCarreraName(name);
                     const selectedCarreraObj = carreras.find(c => c.nombre === name);
                     setSelectedCarreraId(selectedCarreraObj ? selectedCarreraObj.id : null);
                     setSelectedGrupoName('');
                     setSelectedGrupoId(null);
+                    
+                    // Actualizar grupos cuando cambia la carrera seleccionada (para todos los roles)
+                    if (selectedCarreraObj) {
+                      let gruposUrl = `${API_URL}/grupos-filtrados?rol=${currentUser.role}`;
+                      if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+                        gruposUrl += `&clave_carrera=${currentUser.carrera}`;
+                      }
+                      gruposUrl += `&carrera_seleccionada_id=${selectedCarreraObj.id}`;
+                      
+                      fetch(gruposUrl)
+                        .then(res => res.json())
+                        .then(gruposData => {
+                          setGrupos(gruposData);
+                        })
+                        .catch(err => console.error('Error al cargar grupos:', err));
+                    }
                   }}
-                  disabled={currentUser && currentUser.role === 'jefe_carrera'}
                 >
                   <option value="">Seleccionar Carrera</option>
                   {uniqueCarreras.map(career => (
@@ -542,7 +565,7 @@ function Dashboard({ currentUser, onLogout }) {
                     }
                     handleGenerateExams();
                   }}
-                  disabled={!selectedCarreraId && !(currentUser && currentUser.role === 'jefe_carrera' && currentUser.carrera)}
+                  disabled={!selectedCarreraId}
                   style={filteredExamenes.some(e => e.status === 'pendiente_aprobacion') ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                 >
                   Planificar
@@ -590,6 +613,22 @@ function Dashboard({ currentUser, onLogout }) {
                       setSelectedCarreraName(name);
                       setSelectedCarreraId(selectedCarreraObj ? selectedCarreraObj.id : null);
                       setSelectedGrupoIdForExamenes(null);
+                      
+                      // Actualizar grupos cuando cambia la carrera seleccionada (para todos los roles)
+                      if (selectedCarreraObj) {
+                        let gruposUrl = `${API_URL}/grupos-filtrados?rol=${currentUser.role}`;
+                        if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+                          gruposUrl += `&clave_carrera=${currentUser.carrera}`;
+                        }
+                        gruposUrl += `&carrera_seleccionada_id=${selectedCarreraObj.id}`;
+                        
+                        fetch(gruposUrl)
+                          .then(res => res.json())
+                          .then(gruposData => {
+                            setGrupos(gruposData);
+                          })
+                          .catch(err => console.error('Error al cargar grupos:', err));
+                      }
                     }}
                   >
                     <option value="">Seleccionar Carrera</option>
@@ -658,8 +697,25 @@ function Dashboard({ currentUser, onLogout }) {
                     value={selectedCarreraName}
                     onChange={(e) => {
                       const name = e.target.value;
+                      const selectedCarreraObj = carreras.find(c => c.nombre === name);
                       setSelectedCarreraName(name);
-                      setSelectedCarreraId(carreras.find(c => c.nombre === name)?.id || null);
+                      setSelectedCarreraId(selectedCarreraObj ? selectedCarreraObj.id : null);
+                      
+                      // Actualizar grupos cuando cambia la carrera seleccionada (para todos los roles)
+                      if (selectedCarreraObj) {
+                        let gruposUrl = `${API_URL}/grupos-filtrados?rol=${currentUser.role}`;
+                        if (currentUser.role === 'jefe_carrera' && currentUser.carrera) {
+                          gruposUrl += `&clave_carrera=${currentUser.carrera}`;
+                        }
+                        gruposUrl += `&carrera_seleccionada_id=${selectedCarreraObj.id}`;
+                        
+                        fetch(gruposUrl)
+                          .then(res => res.json())
+                          .then(gruposData => {
+                            setGrupos(gruposData);
+                          })
+                          .catch(err => console.error('Error al cargar grupos:', err));
+                      }
                     }}
                   >
                     <option value="">Seleccionar Carrera</option>
@@ -795,7 +851,7 @@ function Dashboard({ currentUser, onLogout }) {
         <GenerateExamsModal
           onClose={() => setShowGenerateModal(false)}
           onGenerate={handleGenerateFromModal}
-          carreraId={selectedCarreraId || (currentUser && currentUser.role === 'jefe_carrera' && carreras.find(c => c.nombre === currentUser.carrera)?.id)}
+          carreraId={selectedCarreraId}
           currentUser={currentUser}
           API_URL={API_URL}
           showToast={showToast}

@@ -47,8 +47,8 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
         const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=${currentUser.role}&carrera_seleccionada_id=${carreraId}`);
         gruposData = await gruposRes.json();
       } else if (currentUser.role === 'jefe_carrera') {
-        // Jefe de carrera solo ve grupos de su carrera
-        const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=jefe_carrera&clave_carrera=${currentUser.carrera}`);
+        // Jefe de carrera ve grupos de la carrera seleccionada (puede tener múltiples carreras: 06, 06B)
+        const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=jefe_carrera&clave_carrera=${currentUser.carrera}&carrera_seleccionada_id=${carreraId}`);
         gruposData = await gruposRes.json();
       }
 
