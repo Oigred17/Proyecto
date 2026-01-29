@@ -11,4 +11,5 @@ class User(Base):
     role = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=True)
     carrera = Column(String, nullable=True)
+    profesor_id = Column(Integer, nullable=True)
     is_active = Column(Integer, default=1)

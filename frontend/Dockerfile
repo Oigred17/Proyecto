@@ -1,7 +1,7 @@
-FROM node:18-bullseye-slim AS build
+FROM node:18-bookworm-slim AS build
 WORKDIR /app
 
-# Instalar herramientas de compilación necesarias para dependencias nativas
+# Instalar herramientas de 	compilación necesarias para dependencias nativas
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	build-essential python3 ca-certificates && rm -rf /var/lib/apt/lists/*
 

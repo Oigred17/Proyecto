@@ -9,7 +9,7 @@ import './GenerateExamsModal.css';
  * - Academia selection restored
  */
 function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_URL, showToast }) {
-  
+
   const [academias, setAcademias] = useState([]);
   const [profesores, setProfesores] = useState([]);
   const [groupsData, setGroupsData] = useState([]);
@@ -25,23 +25,28 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 0. Obtener periodo actual de la API
+      // 0. Obtener periodo actual de la BD local (rápido)
       try {
-        const periodoRes = await fetch(`${API_URL}/horarios-externos/periodo/actual`);
+        const periodoRes = await fetch(`${API_URL}/config/periodo`);
         if (periodoRes.ok) {
           const periodoData = await periodoRes.json();
           if (periodoData && periodoData.clave) {
             setPeriodo(periodoData.clave);
             setPeriodoNombre(periodoData.nombre || periodoData.clave);
+          } else {
+            setPeriodoNombre('2526A');
           }
+        } else {
+          setPeriodoNombre('2526A');
         }
       } catch (err) {
-        console.warn('No se pudo obtener el periodo actual de la API:', err);
+        console.warn('Error al obtener periodo local:', err);
+        setPeriodoNombre('2526A');
       }
 
       // 1. Fetch grupos filtrados según rol del usuario
       let gruposData = [];
-      
+
       if (currentUser.role === 'servicios_escolares' || currentUser.role === 'administrador') {
         // Servicios escolares ve grupos de la carrera seleccionada
         const gruposRes = await fetch(`${API_URL}/grupos-filtrados?rol=${currentUser.role}&carrera_seleccionada_id=${carreraId}`);
@@ -76,23 +81,26 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
 
       // Encontrar la carrera actual para obtener horarios completos
       const currentCarrera = carrerasData.find(c => c.id === parseInt(carreraId));
-      
+
       if (!currentCarrera) {
         setGroupsData([]);
         setLoading(false);
         return;
       }
-      
+
       const processed = gruposData.map(grupoSimple => {
         // Buscar el grupo completo con horarios en la carrera
         const grupoCompleto = currentCarrera?.grupos?.find(g => g.id === grupoSimple.id);
-        
+
         // Collect unique materias from schedules
         const materiasMap = {};
         (grupoCompleto?.horarios || []).forEach(h => {
           if (h.materia && !materiasMap[h.materia.id]) {
             // Check if there's an existing exam record to get sinodal info
             const existing = allExamenes.find(e => e.materia_id === h.materia.id && e.grupo_id === grupoSimple.id);
+            const sinodalId = h.materia.sinodal_id || existing?.sinodal_id || '';
+            const hasSinodal = !!sinodalId;
+            const sinodalNombre = h.materia.sinodal?.nombre || existing?.sinodal?.nombre || null;
 
             materiasMap[h.materia.id] = {
               id: h.materia.id,
@@ -100,8 +108,9 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
               profesorId: h.materia.profesor?.id || null,
               profesor: h.materia.profesor?.nombre || 'Sin asignar',
               aplicadorId: h.materia.profesor?.id || '',
-              hasSinodal: !!existing?.sinodal_id,
-              sinodalNombre: existing?.sinodal?.nombre || null,
+              sinodalId: sinodalId,
+              hasSinodal: hasSinodal,
+              sinodalNombre: sinodalNombre,
               selected: true,
               academiaId: h.materia.academia_id || ''
             };
@@ -197,6 +206,23 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
     }));
   };
 
+  const setSinodalValue = (groupId, materiaId, value) => {
+    const prof = profesores.find(p => p.id === parseInt(value));
+    const nombre = prof ? prof.nombre : null;
+
+    setGroupsData(prev => prev.map(g => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          materias: g.materias.map(m =>
+            m.id === materiaId ? { ...m, sinodalId: value, hasSinodal: !!value, sinodalNombre: nombre } : m
+          )
+        };
+      }
+      return g;
+    }));
+  };
+
   const handleGenerateClick = () => {
     const selection = [];
     groupsData.forEach(g => {
@@ -207,6 +233,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
             grupoId: g.id,
             academiaId: m.academiaId || null,
             aplicadorId: m.aplicadorId || null,
+            sinodalId: m.sinodalId || null,
             modalidad: modalidad
           });
         }
@@ -216,6 +243,23 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
     if (selection.length === 0) {
       if (showToast) showToast("Por favor selecciona al menos una materia.", "warning");
       else alert("Por favor selecciona al menos una materia.");
+      return;
+    }
+
+    // VALIDACIÓN: No permitir generar exámenes si faltan sinodales en las materias seleccionadas
+    const materiasSinSinodal = [];
+    groupsData.forEach(g => {
+      g.materias.forEach(m => {
+        if (m.selected && !m.hasSinodal) {
+          materiasSinSinodal.push(`${g.nombre} - ${m.nombre}`);
+        }
+      });
+    });
+
+    if (materiasSinSinodal.length > 0) {
+      const msg = "No se pueden generar exámenes porque faltan sinodales en las siguientes materias: \n" + materiasSinSinodal.slice(0, 5).join("\n") + (materiasSinSinodal.length > 5 ? "\n..." : "");
+      if (showToast) showToast(msg, "error");
+      else alert(msg);
       return;
     }
 
@@ -306,9 +350,9 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
 
             <div className="control-field">
               <label className="field-label-premium">PERIODO</label>
-              <div className="gem-input-premium" style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+              <div className="gem-input-premium" style={{
+                display: 'flex',
+                alignItems: 'center',
                 gap: '8px',
                 background: '#f8fafc',
                 color: '#475569',
@@ -386,6 +430,7 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                           <th style={{ width: '25%' }}>Materia</th>
                           <th>Docente Titular</th>
                           <th>Docente Aplicador</th>
+                          <th>Docente Sinodal</th>
                           <th>Academia</th>
                           <th>Estado</th>
                         </tr>
@@ -417,6 +462,20 @@ function GenerateExamsModal({ onClose, onGenerate, carreraId, currentUser, API_U
                                 disabled={!m.selected}
                               >
                                 {profesores.map(p => (
+                                  <option key={p.id} value={p.id}>{p.nombre}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td onClick={e => e.stopPropagation()}>
+                              <select
+                                className="gem-select-inner"
+                                value={m.sinodalId}
+                                onChange={e => setSinodalValue(group.id, m.id, e.target.value)}
+                                disabled={!m.selected}
+                                style={!m.sinodalId ? { border: '1px solid #e53e3e' } : {}}
+                              >
+                                <option value="">Seleccionar Sinodal</option>
+                                {profesores.filter(p => p.id !== m.profesorId).map(p => (
                                   <option key={p.id} value={p.id}>{p.nombre}</option>
                                 ))}
                               </select>

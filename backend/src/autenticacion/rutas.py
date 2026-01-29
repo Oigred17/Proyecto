@@ -42,6 +42,8 @@ def register_user(user: esquemas.UserCreate, db: Session = Depends(obtener_db)):
         hashed_password=hashed_password,
         role=user.role,
         email=user.email,
+        carrera=user.carrera,
+        profesor_id=user.profesor_id,
         is_active=1
     )
     db.add(db_user)

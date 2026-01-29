@@ -25,6 +25,11 @@ class Academia(BaseModel):
     class Config:
         from_attributes = True
 
+class AcademiaCreate(BaseModel):
+    nombre: str
+    codigo: Optional[str] = None
+    descripcion: Optional[str] = None
+
 class Materia(BaseModel):
     id: int
     nombre: str
@@ -33,6 +38,9 @@ class Materia(BaseModel):
     carrera_nombre: Optional[str] = None
     academia_id: Optional[int] = None
     academia: Optional[Academia] = None
+    semestre: Optional[int] = None
+    sinodal_id: Optional[int] = None
+    sinodal: Optional[Profesor] = None
     class Config:
         from_attributes = True
 

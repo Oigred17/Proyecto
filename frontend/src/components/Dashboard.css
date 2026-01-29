@@ -1022,3 +1022,15 @@
   color: #718096;
   line-height: 1.5;
 }
+.career-label-fixed {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}

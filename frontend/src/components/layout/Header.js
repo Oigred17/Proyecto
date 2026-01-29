@@ -118,7 +118,7 @@ function Header({ onMenuToggle, currentUser, onLogout, notifications, onMarkAsRe
           <option>Grupo de Desarrollo</option>
         </select>
 
-        <button className="plan-button logout-theme" onClick={onLogout}>
+        <button className="logout-button" onClick={onLogout}>
           <span>Cerrar Sesión</span>
         </button>
       </div>
