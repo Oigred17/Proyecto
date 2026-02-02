@@ -7,7 +7,7 @@ function SinodalesView({ currentUser, showToast }) {
     const [loading, setLoading] = useState(true);
     const [lastAssignedId, setLastAssignedId] = useState(null);
 
-    const API_URL = `http://${window.location.hostname}:8000/api`;
+    const API_URL = `http://${window.location.hostname}:9000/api`;
 
     useEffect(() => {
         fetchData();

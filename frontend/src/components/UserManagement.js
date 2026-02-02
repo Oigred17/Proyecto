@@ -16,7 +16,7 @@ function UserManagement({ showToast, confirmCustom }) {
     const [profesores, setProfesores] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const API_URL = `http://${window.location.hostname}:8000/api`;
+    const API_URL = `http://${window.location.hostname}:9000/api`;
 
     useEffect(() => {
         fetchUsers();

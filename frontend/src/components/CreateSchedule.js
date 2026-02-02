@@ -28,7 +28,7 @@ function CreateSchedule({ onClose, onCreated, currentUser }) {
   });
 
   // Construir la URL base dinámicamente usando el hostname actual
-  const API_URL = `http://${window.location.hostname}:8000/api`;
+  const API_URL = `http://${window.location.hostname}:9000/api`;
 
   useEffect(() => {
     fetch(`${API_URL}/carreras`)
