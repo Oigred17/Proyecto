@@ -8,15 +8,33 @@ function UserManagement({ showToast, confirmCustom }) {
         username: '',
         password: '',
         email: '',
-        role: 'servicios_escolares'
+        role: 'servicios_escolares',
+        carrera: '',
+        profesor_id: ''
     });
+    const [carreras, setCarreras] = useState([]);
+    const [profesores, setProfesores] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const API_URL = `http://${window.location.hostname}:8000/api`;
+    const API_URL = `http://${window.location.hostname}:9000/api`;
 
     useEffect(() => {
         fetchUsers();
+        fetchCarrerasYProfesores();
     }, []);
+
+    const fetchCarrerasYProfesores = async () => {
+        try {
+            const [cRes, pRes] = await Promise.all([
+                fetch(`${API_URL}/carreras`),
+                fetch(`${API_URL}/profesores`)
+            ]);
+            if (cRes.ok) setCarreras(await cRes.json());
+            if (pRes.ok) setProfesores(await pRes.json());
+        } catch (error) {
+            console.error('Error fetching support data:', error);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -49,7 +67,9 @@ function UserManagement({ showToast, confirmCustom }) {
                     username: '',
                     password: '',
                     email: '',
-                    role: 'servicios_escolares'
+                    role: 'servicios_escolares',
+                    carrera: '',
+                    profesor_id: ''
                 });
                 fetchUsers(); // Refrescar la lista
                 showToast('Usuario creado exitosamente', 'success');
@@ -187,6 +207,42 @@ function UserManagement({ showToast, confirmCustom }) {
                                     <option value="jefe_carrera">Jefe de Carrera</option>
                                 </select>
                             </div>
+                            {newUser.role === 'jefe_carrera' && (
+                                <>
+                                    <div className="form-group">
+                                        <label>Carrera Asignada</label>
+                                        <select
+                                            value={newUser.carrera}
+                                            onChange={(e) => setNewUser({ ...newUser, carrera: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">Seleccionar Carrera</option>
+                                            {/* Usar un Set para nombres únicos de carreras si es necesario, 
+                                                pero aquí solemos usar la clave de carrera de la API */}
+                                            {/* Como la DB tiene carreras con nombres, intentaremos obtener las claves 
+                                                o usar el nombre si el sistema lo requiere. 
+                                                El backend espera la CLAVE (ej: 06B) */}
+                                            {/* Si la API /carreras devuelve objetos con 'codigo' o 'id' que mapee a clave: */}
+                                            {carreras.map(c => (
+                                                <option key={c.id} value={c.codigo || c.nombre}>{c.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Profesor Correspondiente</label>
+                                        <select
+                                            value={newUser.profesor_id}
+                                            onChange={(e) => setNewUser({ ...newUser, profesor_id: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">Seleccionar Profesor</option>
+                                            {profesores.map(p => (
+                                                <option key={p.id} value={p.id}>{p.nombre}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </>
+                            )}
                             <div className="modal-actions">
                                 <button type="button" onClick={() => setShowAddModal(false)}>
                                     Cancelar

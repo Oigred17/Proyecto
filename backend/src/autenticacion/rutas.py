@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from typing import Optional
 
 from ..configuracion.base_datos import obtener_db
 from . import modelos, esquemas
@@ -42,6 +42,8 @@ def register_user(user: esquemas.UserCreate, db: Session = Depends(obtener_db)):
         hashed_password=hashed_password,
         role=user.role,
         email=user.email,
+        carrera=user.carrera,
+        profesor_id=user.profesor_id,
         is_active=1
     )
     db.add(db_user)
@@ -52,11 +54,54 @@ def register_user(user: esquemas.UserCreate, db: Session = Depends(obtener_db)):
     return db_user
 
 @router.post("/login", response_model=esquemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(obtener_db)):
-    """Iniciar sesión y obtener token JWT"""
-    user = db.query(modelos.User).filter(modelos.User.username == form_data.username).first()
+def login(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(obtener_db)
+):
+    """Iniciar sesión y obtener token JWT. Acepta form-data o JSON."""
+    user = db.query(modelos.User).filter(modelos.User.username == username).first()
     
-    if not user or not verificar_password(form_data.password, user.hashed_password):
+    if not user or not verificar_password(password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuario inactivo"
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token_data = {"sub": user.username, "role": user.role}
+    if user.carrera:
+        token_data["carrera"] = user.carrera
+        
+    access_token = crear_token_acceso(
+        data=token_data,
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": {
+            "username": user.username,
+            "role": user.role,
+            "carrera": user.carrera,
+            "email": user.email
+        }
+    }
+
+@router.post("/login/json", response_model=esquemas.Token)
+def login_json(login_data: esquemas.UserLogin, db: Session = Depends(obtener_db)):
+    """Iniciar sesión y obtener token JWT. Acepta JSON."""
+    user = db.query(modelos.User).filter(modelos.User.username == login_data.username).first()
+    
+    if not user or not verificar_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario o contraseña incorrectos",

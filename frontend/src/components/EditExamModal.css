@@ -243,3 +243,70 @@
         opacity: 1;
     }
 }
+/* Estilos para disponibilidad de aulas */
+.eem-loading-badge {
+    font-size: 0.75rem;
+    color: #3b82f6;
+    font-weight: 500;
+    margin-left: 8px;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.eem-select-aulas option {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.eem-select-aulas option.aula-ocupada {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.eem-select-aulas option.aula-libre {
+    color: #059669;
+}
+
+.eem-warning-box {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #92400e;
+    animation: eem-slideDown 0.3s ease-out;
+}
+
+.eem-warning-box svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    stroke: #f59e0b;
+}
+
+.eem-warning-box strong {
+    color: #78350f;
+    font-weight: 600;
+}
+
+@keyframes eem-slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

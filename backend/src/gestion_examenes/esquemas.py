@@ -34,6 +34,7 @@ class ExamenUpdate(BaseModel):
     hora_fin: Optional[time] = None
     aula_id: Optional[int] = None
     aplicador_id: Optional[int] = None
+    sinodal_id: Optional[int] = None
     modalidad: Optional[str] = None
 
 class Examen(ExamenBase):

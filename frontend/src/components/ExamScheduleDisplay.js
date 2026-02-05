@@ -8,7 +8,7 @@ const ExamScheduleDisplay = ({ examenes, onRefresh, title, showToast, children }
   const [profesores, setProfesores] = useState([]);
   const [filterText, setFilterText] = useState('');
 
-  const API_URL = `http://${window.location.hostname}:8000/api`;
+  const API_URL = `http://${window.location.hostname}:9000/api`;
 
   useEffect(() => {
     Promise.all([

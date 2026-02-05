@@ -1,0 +1,42 @@
+services:
+  backend:
+    image: proyecto-backend:latest
+    container_name: backend_api
+    restart: always
+    ports:
+      - "0.0.0.0:9000:9000"
+    # No montamos volumenes de código para producción
+    volumes:
+      - ./db:/app/db
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://proj_user:proj_pass@db:9003/proyecto_db
+    depends_on:
+      - db
+    extra_hosts:
+      - "serv-horarios.unsis.lan:132.18.41.238"
+
+  frontend:
+    image: proyecto-frontend:latest
+    container_name: frontend_app
+    restart: always
+    ports:
+      - "9001:9001"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    container_name: proyecto_db
+    restart: always
+    command: -p 9003
+    environment:
+      - POSTGRES_USER=proj_user
+      - POSTGRES_PASSWORD=proj_pass
+      - POSTGRES_DB=proyecto_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "9003:9003"
+
+volumes:
+  pgdata:

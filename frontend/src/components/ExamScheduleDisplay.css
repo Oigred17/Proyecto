@@ -175,17 +175,20 @@
 }
 
 .td-semester-header {
-  background-color: #ffffff !important;
-  color: #1e293b !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
   font-weight: 800;
-  padding: 12px 24px !important;
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
+  padding: 16px 24px !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   text-align: center;
   border: none !important;
-  border-bottom: 2px solid #f1f5f9 !important;
-  border-top: 2px solid #f1f5f9 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.semester-divider-row {
+  position: relative;
 }
 
 .semester-divider-row td {
@@ -193,14 +196,14 @@
 }
 
 .group-spacer {
-  height: 16px;
+  height: 20px;
 }
 
 .group-spacer td {
   background-color: transparent !important;
   border: none !important;
   padding: 0 !important;
-  height: 16px;
+  height: 20px;
 }
 
 .btn-save {

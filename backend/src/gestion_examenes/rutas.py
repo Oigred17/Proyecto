@@ -142,6 +142,8 @@ class GenerarExamenesSelection(BaseModel):
     grupoId: int
     academiaId: Optional[Union[int, str]] = None 
     aplicadorId: Optional[int] = None
+    sinodalId: Optional[int] = None
+    sinodal_id: Optional[int] = None # Support both formats
     modalidad: Optional[str] = None
 
 class GenerarExamenesRequest(BaseModel):
@@ -178,15 +180,24 @@ def generar_examenes(
 
         fecha_lunes_inicio = obtener_siguiente_lunes(date.today())
 
-        # 1. Agrupar la selección por Academia (usando valor del UI o de la DB)
-        academias_map = {} # academia_id -> list of seleccion items
-        individuales = []   # list of seleccion items without academia
+        # 1. Pre-cargar datos para evitar cientos de mini-queries (Optimización Local)
+        materia_ids = list(set([item.materiaId for item in seleccion]))
+        grupo_ids = list(set([item.grupoId for item in seleccion]))
+        
+        materias_db = db.query(modelos_academica.Materia).filter(modelos_academica.Materia.id.in_(materia_ids)).all()
+        grupos_db = db.query(modelos_academica.Grupo).filter(modelos_academica.Grupo.id.in_(grupo_ids)).all()
+        
+        materias_cache = {m.id: m for m in materias_db}
+        grupos_cache = {g.id: g for g in grupos_db}
+
+        # Agrupar la selección por Academia
+        academias_map = {} 
+        individuales = []   
 
         for item in seleccion:
-            materia = db.query(modelos_academica.Materia).get(item.materiaId)
+            materia = materias_cache.get(item.materiaId)
             if not materia: continue
             
-            # Prioridad: 1. ID de academia enviado, 2. Academia en DB
             aca_val = item.academiaId
             final_aca_id = None
             
@@ -200,7 +211,6 @@ def generar_examenes(
                     academias_map[final_aca_id] = []
                 academias_map[final_aca_id].append(item)
             elif aca_val == 'si':
-                # Si dice "si" pero no tiene ID, lo agrupamos por nombre de materia para "simular" una academia ad-hoc
                 pseudoid = f"materia_{materia.nombre}"
                 if pseudoid not in academias_map:
                     academias_map[pseudoid] = []
@@ -208,20 +218,7 @@ def generar_examenes(
             else:
                 individuales.append(item)
 
-        # 0. Verificar duplicados antes de borrar
-        # El usuario pidió bloquear la regeneración si ya existen exámenes ("borradores").
-        for item in seleccion:
-            existe = db.query(modelos_examenes.Examen).filter(
-                modelos_examenes.Examen.materia_id == item.materiaId,
-                modelos_examenes.Examen.grupo_id == item.grupoId
-            ).first()
-            if existe:
-                 raise HTTPException(
-                     status_code=400, 
-                     detail=f"Ya existen horarios planificados para la materia {existe.materia.nombre} y grupo {existe.grupo.nombre_grupo}. Por favor, elimínelos manualmente si desea volver a generar."
-                 )
-
-        # Si no existen, limpiamos cualquier residuo (doble check)
+        # 2. Limpiar registros previos de la selección actual para regenerar
         for item in seleccion:
             db.query(modelos_examenes.Examen).filter(
                 modelos_examenes.Examen.materia_id == item.materiaId,
@@ -285,7 +282,7 @@ def generar_examenes(
                 return False
             
             if not ignore_semestre:
-                g_obj = db.query(modelos_academica.Grupo).get(grupo_id)
+                g_obj = grupos_cache.get(grupo_id)
                 if g_obj:
                     sem = obtener_semestre(g_obj.nombre_grupo)
                     if (fecha, g_obj.carrera_id, sem) in ocupacion_semestres: return False
@@ -317,7 +314,10 @@ def generar_examenes(
             clash_ingles = db.query(modelos_horarios.Horario).join(modelos_academica.Materia).filter(
                 modelos_horarios.Horario.grupo_id == grupo_id,
                 func.upper(modelos_horarios.Horario.dia_semana) == dia_nom.upper(),
-                func.trim(func.upper(modelos_academica.Materia.nombre)).in_(['INGLÉS', 'INGLES', 'ingles', 'inglés'.upper()])
+                func.trim(func.upper(modelos_academica.Materia.nombre)).in_([
+                    'INGLÉS', 'INGLES', 'SALA DE CÓMPUTO', 'SALA DE COMPUTO',
+                    'INGLÉS'.upper(), 'SALA DE CÓMPUTO'.upper()
+                ])
             ).first()
             
             if clash_ingles:
@@ -340,7 +340,7 @@ def generar_examenes(
 
         def registrar_slot(grupo_id, aula_id, fecha, h_ini, h_fin):
             ocupacion_grupos.add((fecha, grupo_id))
-            g_obj = db.query(modelos_academica.Grupo).get(grupo_id)
+            g_obj = grupos_cache.get(grupo_id)
             if g_obj:
                 sem = obtener_semestre(g_obj.nombre_grupo)
                 ocupacion_semestres.add((fecha, g_obj.carrera_id, sem))
@@ -515,16 +515,19 @@ def generar_examenes(
                     else:
                         # Si no hay aula, solo registrar que el grupo está ocupado ese día
                         ocupacion_grupos.add((fecha_final, it.grupoId))
-                        g_obj = db.query(modelos_academica.Grupo).get(it.grupoId)
+                        g_obj = grupos_cache.get(it.grupoId)
                         if g_obj:
                             sem = obtener_semestre(g_obj.nombre_grupo)
                             ocupacion_semestres.add((fecha_final, g_obj.carrera_id, sem))
+                    
+                    m_obj = materias_cache.get(it.materiaId)
                     
                     db.add(modelos_examenes.Examen(
                         fecha=fecha_final, hora_inicio=hora_inicio_final, hora_fin=hora_fin_final,
                         tipo=tipo_examen, materia_id=it.materiaId, aula_id=a_id,
                         grupo_id=it.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
                         aplicador_id=it.aplicadorId,
+                        sinodal_id=it.sinodalId or it.sinodal_id or (m_obj.sinodal_id if m_obj else None),
                         modalidad=it.modalidad or modalidad_global,
                         status='borrador'
                     ))
@@ -569,11 +572,13 @@ def generar_examenes(
                                     # Doble chequeo con el aula específica
                                     if slot_libre(materia_item.grupoId, aula_ok, f_int, h.hora_inicio, h.hora_fin, ignore_semestre=True, ignore_clases=True, ignore_grupo_ocupacion=False):
                                         registrar_slot(materia_item.grupoId, aula_ok, f_int, h.hora_inicio, h.hora_fin)
+                                        m_obj = materias_cache.get(materia_item.materiaId)
                                         db.add(modelos_examenes.Examen(
                                             fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h.hora_fin,
                                             tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=aula_ok,
                                             grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
                                             aplicador_id=materia_item.aplicadorId,
+                                            sinodal_id=materia_item.sinodalId or getattr(materia_item, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                             modalidad=materia_item.modalidad or modalidad_global,
                                             status='borrador'
                                         ))
@@ -583,15 +588,17 @@ def generar_examenes(
                                     # Si no hay aula disponible, crear examen sin aula (PERO SOLO SI EL SLOT DE TIEMPO ES VÁLIDO)
                                     if slot_libre(materia_item.grupoId, None, f_int, h.hora_inicio, h.hora_fin, ignore_semestre=True, ignore_clases=True, ignore_grupo_ocupacion=False):
                                         ocupacion_grupos.add((f_int, materia_item.grupoId))
-                                        g_obj = db.query(modelos_academica.Grupo).get(materia_item.grupoId)
+                                        g_obj = grupos_cache.get(materia_item.grupoId)
                                         if g_obj:
                                             sem = obtener_semestre(g_obj.nombre_grupo)
                                             ocupacion_semestres.add((f_int, g_obj.carrera_id, sem))
+                                        m_obj = materias_cache.get(materia_item.materiaId)
                                         db.add(modelos_examenes.Examen(
                                             fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h.hora_fin,
                                             tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=None,
                                             grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
                                             aplicador_id=materia_item.aplicadorId,
+                                            sinodal_id=materia_item.sinodalId or getattr(materia_item, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                             modalidad=materia_item.modalidad or modalidad_global,
                                             status='borrador'
                                         ))
@@ -617,10 +624,14 @@ def generar_examenes(
                                     if aula_ok:
                                         if slot_libre(materia_item.grupoId, aula_ok, f_int, h_s, h_e_calc, ignore_semestre=True, ignore_clases=True, ignore_grupo_ocupacion=False):
                                             registrar_slot(materia_item.grupoId, aula_ok, f_int, h_s, h_e_calc)
+                                            m_obj = materias_cache.get(materia_item.materiaId)
                                             db.add(modelos_examenes.Examen(
                                                 fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                                 tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=aula_ok,
                                                 grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
+                                                aplicador_id=materia_item.aplicadorId,
+                                                sinodal_id=materia_item.sinodalId or getattr(materia_item, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
+                                                modalidad=materia_item.modalidad or modalidad_global,
                                                 status='borrador'
                                             ))
                                             ex_creado = True
@@ -629,14 +640,18 @@ def generar_examenes(
                                         # Si no hay aula disponible, crear examen sin aula
                                         if slot_libre(materia_item.grupoId, None, f_int, h_s, h_e_calc, ignore_semestre=True, ignore_clases=True, ignore_grupo_ocupacion=False):
                                             ocupacion_grupos.add((f_int, materia_item.grupoId))
-                                            g_obj = db.query(modelos_academica.Grupo).get(materia_item.grupoId)
+                                            g_obj = grupos_cache.get(materia_item.grupoId)
                                             if g_obj:
                                                 sem = obtener_semestre(g_obj.nombre_grupo)
                                                 ocupacion_semestres.add((f_int, g_obj.carrera_id, sem))
+                                            m_obj = materias_cache.get(materia_item.materiaId)
                                             db.add(modelos_examenes.Examen(
                                                 fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                                 tipo=tipo_examen, materia_id=materia_item.materiaId, aula_id=None,
                                                 grupo_id=materia_item.grupoId, academia_id=aca_id if isinstance(aca_id, int) else None,
+                                                aplicador_id=materia_item.aplicadorId,
+                                                sinodal_id=materia_item.sinodalId or getattr(materia_item, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
+                                                modalidad=materia_item.modalidad or modalidad_global,
                                                 status='borrador'
                                             ))
                                             ex_creado = True
@@ -673,11 +688,13 @@ def generar_examenes(
                         if aula_ok:
                              if slot_libre(it.grupoId, aula_ok, f_int, h_s, h_e_calc, ignore_semestre=True, ignore_clases=True):
                                 registrar_slot(it.grupoId, aula_ok, f_int, h_s, h_e_calc)
+                                m_obj = materias_cache.get(it.materiaId)
                                 db.add(modelos_examenes.Examen(
                                     fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                     tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
                                     grupo_id=it.grupoId, 
                                     aplicador_id=it.aplicadorId,
+                                    sinodal_id=it.sinodalId or getattr(it, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                     modalidad=it.modalidad or modalidad_global,
                                     status='borrador'
                                 ))
@@ -685,11 +702,13 @@ def generar_examenes(
                         else:
                              # Sin aula
                              registrar_slot(it.grupoId, None, f_int, h_s, h_e_calc)
+                             m_obj = materias_cache.get(it.materiaId)
                              db.add(modelos_examenes.Examen(
                                 fecha=f_int, hora_inicio=h_s, hora_fin=h_e_calc,
                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=None,
                                 grupo_id=it.grupoId, 
                                 aplicador_id=it.aplicadorId,
+                                sinodal_id=it.sinodalId or getattr(it, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                 modalidad=it.modalidad or modalidad_global,
                                 status='borrador'
                             ))
@@ -711,25 +730,29 @@ def generar_examenes(
                     
                     if aula_ok:
                          if slot_libre(it.grupoId, aula_ok, f_int, h.hora_inicio, h_e_calc, ignore_semestre=True):
-                            registrar_slot(it.grupoId, aula_ok, f_int, h.hora_inicio, h_e_calc)
-                            db.add(modelos_examenes.Examen(
-                                fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
-                                tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
-                                grupo_id=it.grupoId, 
-                                aplicador_id=it.aplicadorId,
-                                modalidad=it.modalidad or modalidad_global,
-                                status='borrador'
-                            ))
-                            ex_creado = True; break
+                             registrar_slot(it.grupoId, aula_ok, f_int, h.hora_inicio, h_e_calc)
+                             m_obj = materias_cache.get(it.materiaId)
+                             db.add(modelos_examenes.Examen(
+                                 fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
+                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
+                                 grupo_id=it.grupoId, 
+                                 aplicador_id=it.aplicadorId,
+                                 sinodal_id=it.sinodalId or getattr(it, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
+                                 modalidad=it.modalidad or modalidad_global,
+                                 status='borrador'
+                             ))
+                             ex_creado = True; break
                     else:
                         # Fallback sin aula
                         if slot_libre(it.grupoId, None, f_int, h.hora_inicio, h_e_calc, ignore_semestre=True):
                              registrar_slot(it.grupoId, None, f_int, h.hora_inicio, h_e_calc)
+                             m_obj = materias_cache.get(it.materiaId)
                              db.add(modelos_examenes.Examen(
                                 fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
                                 tipo=tipo_examen, materia_id=it.materiaId, aula_id=None,
                                 grupo_id=it.grupoId, 
                                 aplicador_id=it.aplicadorId,
+                                sinodal_id=it.sinodalId or getattr(it, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                 modalidad=it.modalidad or modalidad_global,
                                 status='borrador'
                             ))
@@ -744,11 +767,13 @@ def generar_examenes(
                             aula_ok = find_best_aula(it.grupoId, f_int, h.hora_inicio, h_e_calc, h.aula_id)
                             if aula_ok and slot_libre(it.grupoId, aula_ok, f_int, h.hora_inicio, h_e_calc, ignore_semestre=True):
                                 registrar_slot(it.grupoId, aula_ok, f_int, h.hora_inicio, h_e_calc)
+                                m_obj = materias_cache.get(it.materiaId)
                                 db.add(modelos_examenes.Examen(
                                     fecha=f_int, hora_inicio=h.hora_inicio, hora_fin=h_e_calc,
                                     tipo=tipo_examen, materia_id=it.materiaId, aula_id=aula_ok,
                                     grupo_id=it.grupoId, 
                                     aplicador_id=it.aplicadorId,
+                                    sinodal_id=it.sinodalId or getattr(it, 'sinodal_id', None) or (m_obj.sinodal_id if m_obj else None),
                                     modalidad=it.modalidad or modalidad_global,
                                     status='borrador'
                                 ))
@@ -782,6 +807,8 @@ def update_examen(examen_id: int, datos: esquemas.ExamenUpdate, db: Session = De
         examen.aula_id = datos.aula_id
     if datos.aplicador_id:
         examen.aplicador_id = datos.aplicador_id
+    if datos.sinodal_id:
+        examen.sinodal_id = datos.sinodal_id
     if datos.modalidad:
         examen.modalidad = datos.modalidad
         
@@ -1019,3 +1046,89 @@ def revision_grupo(datos: RevisionRequest, db: Session = Depends(obtener_db)):
     db.commit()
     
     return {"message": f"Exámenes {nuevo_status}s para {count_grupos} grupo(s)."}
+
+
+@router.get("/aulas/disponibilidad")
+def obtener_aulas_con_disponibilidad(
+    fecha: date,
+    hora_inicio: str,
+    hora_fin: str,
+    examen_id: Optional[int] = None,
+    db: Session = Depends(obtener_db)
+):
+    """
+    Obtiene todas las aulas con su estado de disponibilidad para una fecha y hora específicas.
+    Útil para el combobox de selección de aulas al modificar exámenes.
+    
+    - **fecha**: Fecha del examen (formato YYYY-MM-DD)
+    - **hora_inicio**: Hora de inicio (formato HH:MM)
+    - **hora_fin**: Hora de fin (formato HH:MM)
+    - **examen_id**: ID del examen actual (para excluirlo de conflictos)
+    
+    Retorna lista de aulas con:
+    - id, nombre, capacidad, tipo
+    - ocupada: true/false
+    - motivo: razón por la que está ocupada (si aplica)
+    """
+    from datetime import datetime as dt
+    
+    # Convertir strings de hora a objetos time
+    h_inicio = dt.strptime(hora_inicio, "%H:%M").time()
+    h_fin = dt.strptime(hora_fin, "%H:%M").time()
+    
+    # Obtener todas las aulas
+    aulas = db.query(modelos_academica.Aula).order_by(modelos_academica.Aula.nombre).all()
+    
+    # Mapear día de la semana
+    dias_map = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'}
+    dia_semana = dias_map[fecha.weekday()]
+    
+    resultado = []
+    
+    for aula in aulas:
+        disponible = True
+        motivo = None
+        
+        # Verificar conflictos con otros exámenes
+        examenes_conflicto = db.query(modelos_examenes.Examen).filter(
+            modelos_examenes.Examen.aula_id == aula.id,
+            modelos_examenes.Examen.fecha == fecha,
+            modelos_examenes.Examen.id != examen_id if examen_id else True
+        ).all()
+        
+        for ex in examenes_conflicto:
+            # Verificar solapamiento de horarios
+            if (h_inicio < ex.hora_fin) and (h_fin > ex.hora_inicio):
+                disponible = False
+                materia_nombre = ex.materia.nombre if ex.materia else "Desconocida"
+                motivo = f"Examen de {materia_nombre} ({ex.hora_inicio.strftime('%H:%M')}-{ex.hora_fin.strftime('%H:%M')})"
+                break
+        
+        # Si no hay conflicto con exámenes, verificar horarios de clases regulares
+        if disponible:
+            horarios_conflicto = db.query(modelos_horarios.Horario).filter(
+                modelos_horarios.Horario.aula_id == aula.id,
+                modelos_horarios.Horario.dia_semana == dia_semana
+            ).options(
+                joinedload(modelos_horarios.Horario.materia),
+                joinedload(modelos_horarios.Horario.grupo)
+            ).all()
+            
+            for horario in horarios_conflicto:
+                if (h_inicio < horario.hora_fin) and (h_fin > horario.hora_inicio):
+                    disponible = False
+                    materia_nombre = horario.materia.nombre if horario.materia else "Clase"
+                    grupo_nombre = horario.grupo.nombre_grupo if horario.grupo else ""
+                    motivo = f"Clase de {materia_nombre} - Grupo {grupo_nombre} ({horario.hora_inicio.strftime('%H:%M')}-{horario.hora_fin.strftime('%H:%M')})"
+                    break
+        
+        resultado.append({
+            "id": aula.id,
+            "nombre": aula.nombre,
+            "capacidad": aula.capacidad,
+            "tipo": aula.tipo,
+            "ocupada": not disponible,
+            "motivo": motivo
+        })
+    
+    return resultado

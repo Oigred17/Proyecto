@@ -4,14 +4,16 @@ services:
     container_name: backend_api
     restart: always
     ports:
-      - "0.0.0.0:8000:8000"
+      - "0.0.0.0:9000:9000"
     volumes:
       - ./backend:/app
       - ./db:/app/db
     environment:
-      - DATABASE_URL=postgresql+psycopg2://proj_user:proj_pass@db:5432/proyecto_db
+      - DATABASE_URL=postgresql+psycopg2://proj_user:proj_pass@db:9003/proyecto_db
     depends_on:
       - db
+    extra_hosts:
+      - "serv-horarios.unsis.lan:132.18.41.238"
 
   frontend:
     build:
@@ -20,7 +22,7 @@ services:
     container_name: frontend_app
     restart: always
     ports:
-      - "0.0.0.0:80:80"
+      - "0.0.0.0:9001:9001"
     depends_on:
       - backend
 
@@ -28,6 +30,7 @@ services:
     image: postgres:15-alpine
     container_name: proyecto_db
     restart: always
+    command: -p 9003
     environment:
       - POSTGRES_USER=proj_user
       - POSTGRES_PASSWORD=proj_pass
@@ -35,15 +38,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "9003:9003"
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-
+networks:
+  proycal_net:
+    driver: overlay
 
 volumes:
   pgdata:
+
 

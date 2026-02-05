@@ -15,6 +15,8 @@ class MateriaRef(BaseModel):
     profesor_id: Optional[int] = None
     profesor: Optional[ProfesorRef] = None
     academia_id: Optional[int] = None
+    sinodal_id: Optional[int] = None
+    sinodal: Optional[ProfesorRef] = None
     class Config:
         from_attributes = True
 

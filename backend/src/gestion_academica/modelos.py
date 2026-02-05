@@ -19,7 +19,7 @@ class Profesor(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
     email = Column(String, unique=True, index=True, nullable=True)
-    materias = relationship("Materia", back_populates="profesor")
+    materias = relationship("Materia", foreign_keys="Materia.profesor_id", back_populates="profesor")
 
 class Academia(Base):
     """Modelo de academia académica."""
@@ -47,9 +47,12 @@ class Materia(Base):
     carrera_id = Column(Integer, ForeignKey('carreras.id'))
     profesor_id = Column(Integer, ForeignKey('profesores.id'))
     academia_id = Column(Integer, ForeignKey('academias.id'), nullable=True)
+    semestre = Column(Integer, nullable=True)
+    sinodal_id = Column(Integer, ForeignKey('profesores.id'), nullable=True)
 
     carrera = relationship("Carrera", back_populates="materias")
-    profesor = relationship("Profesor", back_populates="materias")
+    profesor = relationship("Profesor", foreign_keys=[profesor_id], back_populates="materias")
+    sinodal = relationship("Profesor", foreign_keys=[sinodal_id])
     academia = relationship("Academia")
     horarios = relationship("Horario", back_populates="materia")
     examenes = relationship("Examen", back_populates="materia")
@@ -59,6 +62,7 @@ class Grupo(Base):
     __tablename__ = 'grupos'
     id = Column(Integer, primary_key=True, index=True)
     nombre_grupo = Column(String)
+    semestre = Column(Integer, nullable=True)
     carrera_id = Column(Integer, ForeignKey('carreras.id'))
 
     carrera = relationship("Carrera", back_populates="grupos")

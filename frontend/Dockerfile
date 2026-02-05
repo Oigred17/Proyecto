@@ -1,7 +1,7 @@
-FROM node:18-bullseye-slim AS build
+FROM node:18-bookworm-slim AS build
 WORKDIR /app
 
-# Instalar herramientas de compilación necesarias para dependencias nativas
+# Instalar herramientas de 	compilación necesarias para dependencias nativas
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	build-essential python3 ca-certificates && rm -rf /var/lib/apt/lists/*
 
@@ -17,11 +17,14 @@ RUN npm run build
 
 FROM nginx:alpine
 
+# Copiar configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copiar los archivos compilados al directorio servido por nginx
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Exponer el puerto 80 (estándar de nginx)
-EXPOSE 80
+# Exponer el puerto 9001
+EXPOSE 9001
 
 # Ejecutar nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]

@@ -7,7 +7,7 @@ function ServiciosEscolaresHome({ currentUser }) {
   const [error, setError] = useState(null);
 
   // Construir la URL base dinámicamente
-  const API_URL = `http://${window.location.hostname}:8000/api`;
+  const API_URL = `http://${window.location.hostname}:9000/api`;
 
   useEffect(() => {
     const fetchExamenes = async () => {
